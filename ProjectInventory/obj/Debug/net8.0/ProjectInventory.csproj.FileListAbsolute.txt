@@ -430,3 +430,4 @@ C:\Users\LOQ\RiderProjects\ProjectInventory\ProjectInventory\bin\Debug\net8.0\Ne
 C:\Users\LOQ\RiderProjects\ProjectInventory\ProjectInventory\bin\Debug\net8.0\NToastNotify.dll
 C:\Users\LOQ\RiderProjects\ProjectInventory\ProjectInventory\bin\Debug\net8.0\System.Security.Permissions.dll
 C:\Users\LOQ\RiderProjects\ProjectInventory\ProjectInventory\obj\Debug\net8.0\ProjectInventory.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\LOQ\RiderProjects\ProjectInventory\ProjectInventory\obj\Debug\net8.0\ProjectInventory.sourcelink.json

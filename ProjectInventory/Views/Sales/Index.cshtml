@@ -1,0 +1,56 @@
+@model System.Collections.Generic.List<ProjectInventory.Entities.Sale>
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Sales List</h2>
+        <a asp-action="Create" class="btn btn-primary">+ Create New Sale</a>
+    </div>
+
+    <table class="table table-striped table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Invoice Number</th>
+                <th>Date</th>
+                <th>Total Amount</th>
+                <th>Discount</th>
+                <th>Taxable Amount</th>
+                <th>Tax Amount</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                foreach (var sale in Model)
+                {
+                    <tr>
+                        <td>@sale.InvoiceNo</td>
+                        <td>@sale.TransactionDate.ToString("yyyy-MM-dd")</td>
+                        <td>@sale.TotalAmount.ToString("0.00")</td>
+                        <td>@sale.DiscountAmount.ToString("0.00")</td>
+                        <td>@sale.TaxableAmount.ToString("0.00")</td>
+                        <td>@sale.TaxAmount.ToString("0.00")</td>
+                        <td>@sale.Description</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@sale.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <a asp-action="Details" asp-route-id="@sale.Id" class="btn btn-sm btn-info">Details</a>
+                            <a asp-action="Delete" asp-route-id="@sale.Id" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" class="text-center">No sales found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

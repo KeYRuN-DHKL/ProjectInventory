@@ -5,11 +5,10 @@
     Layout = "_Layout";
 }
 
-<h2>Category</h2>
 <form asp-action="Create" method="Post">
     <div class="form-group">
         <label asp-for="Name">Name</label>
-        <input type="text" asp-for="Name"  class="form-control" required/>
+        <input type="text" asp-for="Name" class="form-control" required/>
         <span asp-validation-for="Name" class="text-danger"></span>
     </div>
     <div class="form-group">

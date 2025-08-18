@@ -12,7 +12,7 @@ public class ProductVm
     public string Name { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Code is required.")]
-    [RegularExpression(@"^\d{5}$", ErrorMessage = "Code must be exactly 5 digits.")]
+    [RegularExpression(@"^\d+$", ErrorMessage = "Code must be numbers only.")]
     public string Code { get; set; } = string.Empty;
     
     [Required(ErrorMessage = "Cost Price is required.")]

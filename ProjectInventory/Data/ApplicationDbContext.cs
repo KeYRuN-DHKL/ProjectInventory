@@ -14,4 +14,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<StakeHolder> StakeHolders { get; set; }
     
     public DbSet<Product> Products { get; set; }
+    
+    public DbSet<Purchase> Purchases { get; set; }
+    
+    public DbSet<StockMovement> StockMovements { get; set; }
+    
+    public DbSet<Sale> Sales { get; set; }
+    
 }

@@ -5,8 +5,10 @@
     Layout = "_Layout";
 }
 
-<h2>CategoryItem Update</h2>
 <form asp-action="Edit" method="Post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger">
+    </div>
     <input type="hidden" asp-for="Id"/>
     <div class="form-group">
         <label asp-for="Name">Name</label>
@@ -25,4 +27,5 @@
     </div>
     <br/>
     <button type="submit" asp-action="Edit" class="btn btn-primary">Update</button>
+    <a class="btn btn-secondary" asp-action="Index">Cancel</a>
 </form>

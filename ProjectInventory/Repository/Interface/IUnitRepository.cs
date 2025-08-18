@@ -7,5 +7,5 @@ public interface IUnitRepository
 {
     Task<List<Unit>> GetAllAsync();
     Task<Unit?> GetByIdAsync(Guid id);
-    Task<List<SelectListItem?>> GetAllSelectListAsync();
+    Task<List<SelectListItem>> GetAllSelectListAsync();
 }

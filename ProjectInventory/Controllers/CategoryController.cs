@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using NToastNotify;
 using ProjectInventory.Dto;
 using ProjectInventory.Models;
 using ProjectInventory.Repository.Interface;
@@ -12,11 +13,13 @@ public class CategoryController:Controller
 {
     private readonly ICategoryRepository _repository;
     private readonly ICategoryService _service;
+    private readonly IToastNotification _toastNotification;
 
-    public CategoryController(ICategoryRepository repository,ICategoryService service)
+    public CategoryController(ICategoryRepository repository,ICategoryService service,IToastNotification toastNotification)
     {
         _repository = repository;
         _service = service;
+        _toastNotification = toastNotification;
     }
 
     public async Task<IActionResult> Index()
@@ -48,9 +51,13 @@ public class CategoryController:Controller
                 IsActive = true
             };
             var isCreated = await _service.CreateAsync(categoryList);
-            if (!isCreated)
+            if (isCreated)
             {
-                return View(vm);
+                _toastNotification.AddSuccessToastMessage("Item added successfully");
+            }
+            else
+            {
+                _toastNotification.AddErrorToastMessage("Unable to add item");
             }
         }
         catch (DbUpdateException ex1)
@@ -99,18 +106,46 @@ public class CategoryController:Controller
                 Description = vm.Description,
                 IsActive = vm.IsActive
             };
-            await _service.EditAsync(id,categorylist);
+            var isUpdated = await _service.EditAsync(id,categorylist);
+            if (isUpdated)
+            {
+                _toastNotification.AddSuccessToastMessage("An item has been updated");
+                return RedirectToAction(nameof(Index));
+            }
+
+            _toastNotification.AddErrorToastMessage("Failed to update an item");
+            return View(vm);
         }
         catch (Exception ex)
         {
+            ModelState.AddModelError("", $"Unable to Update an item {ex.Message}");
             return View(vm);
         }
-        return RedirectToAction(nameof(Index));
     }
 
     public async Task<IActionResult> Remove(Guid id)
     {
-        await _service.DeleteAsync(id);
+        var item = await _repository.GetByIdAsync(id);
+        if (item == null)
+            return NotFound();
+        var category = new CategoryDeleteVm
+        {
+            Name = item.Name,
+            Description = item.Description,
+            IsActive = item.IsActive
+        };
+        return View(category);
+    }
+    
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveConfirmed(Guid id)
+    {
+        var isDeleted = await _service.DeleteAsync(id);
+        if (isDeleted)
+            _toastNotification.AddSuccessToastMessage("Item deleted successfully");
+        else
+            _toastNotification.AddErrorToastMessage("Unable to delete the item");
         return RedirectToAction(nameof(Index));
     }
 }

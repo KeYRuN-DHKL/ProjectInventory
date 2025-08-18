@@ -4,11 +4,11 @@
     ViewBag.Title = "Category List";
     Layout = "_Layout";
 }
-
-<h2>Category List</h2>
-<a asp-action="Create" class="btn btn-primary">Add New Item</a>
-<table class="table table-striped">
-    <thead>
+<div class="d-flex justify-content-end">
+    <a asp-action="Create" class="btn btn-primary">Add New Item</a>
+</div>
+<table class="table table-striped table-responsive table-bordered">
+    <thead class="bg-dark text-white text-center">
     <tr>
         <th>Category Name</th>
         <th>Category Description</th>
@@ -16,7 +16,13 @@
         <th>Action</th>
     </tr>
     </thead>
-    <tbody>
+    @if(!Model.Any())
+    {
+        <tr>
+            <td colspan="8" class="text-danger">No StakeHolders Found</td>
+        </tr>
+    }
+    <tbody class="text-center">
     @foreach (var items in Model)
     {
         <tr>
@@ -31,8 +37,8 @@
                 }
             </td>
             <td>
-                <a asp-action="Edit" asp-route-Id="@items.Id" class="btn btn-secondary">Edit</a>
-                <a asp-action="Remove" asp-route-Id="@items.Id" class="btn btn-secondary">Delete</a>
+                <a asp-action="Edit" asp-route-id="@items.Id" class="btn btn-secondary">Edit</a>
+                <a asp-action="Remove" asp-route-id="@items.Id" class="btn btn-secondary">Delete</a>
             </td>
         </tr>
     }

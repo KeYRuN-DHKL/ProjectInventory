@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using ProjectInventory.Data;
 using ProjectInventory.Dto;
 using ProjectInventory.Entities;
@@ -14,8 +15,13 @@ public class StakeHolderService:IStakeHolderService
         _context = context;
     }
 
-    public async Task AddAsync(StakeHolderDto dto)
+    public async Task<bool> AddAsync(StakeHolderDto dto)
     {
+        var isExisted = await _context.StakeHolders.AnyAsync(c =>
+            c.VatNo == dto.VatNo && c.PhoneNumber == dto.PhoneNumber && c.Email == dto.Email);
+        if (isExisted)
+            throw new InvalidOperationException("Person Already Exists");
+        
         var items = new StakeHolder
         {
             Id = dto.Id,
@@ -29,10 +35,10 @@ public class StakeHolderService:IStakeHolderService
             CreatedAt = DateTime.UtcNow
         };
         _context.StakeHolders.Add(items);
-        await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task UpdateAsync(Guid id,StakeHolderDto dto)
+    public async Task<bool> UpdateAsync(Guid id,StakeHolderDto dto)
     {
         var items = await _context.StakeHolders.FindAsync(id);
         
@@ -49,15 +55,15 @@ public class StakeHolderService:IStakeHolderService
         items.UpdatedAt = DateTime.UtcNow;
 
         _context.StakeHolders.Update(items);
-        await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
         var item = await _context.StakeHolders.FindAsync(id);
         if (item == null)
             throw new InvalidOperationException($"Item with the Id: {id} not found");
         _context.StakeHolders.Remove(item);
-        await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync() > 0;
     }
 }

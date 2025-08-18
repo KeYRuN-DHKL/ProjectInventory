@@ -128,11 +128,8 @@ public class ProductController : Controller
                 _toastNotification.AddSuccessToastMessage("Item updated successfully");
                 return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                _toastNotification.AddErrorToastMessage("Failed to update an item...");
-                return View(vm);
-            }
+            _toastNotification.AddErrorToastMessage("Failed to update an item...");
+            return View(vm);
         }
         catch (Exception ex)
         {

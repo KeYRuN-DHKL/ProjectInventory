@@ -31,24 +31,27 @@ public class CategoryService :ICategoryService
         return isSaved;
     }
 
-    public async Task EditAsync(Guid id,CategoryDto dto)
+    public async Task<bool> EditAsync(Guid id,CategoryDto dto)
     {
          var items = await _context.Categories.FirstOrDefaultAsync(e => e.Id == id);
          if (items == null)
-             throw new InvalidOperationException("Item not found with the id: {id}");
+             throw new InvalidOperationException("Category not found with the id: {id}");
+         var isAvailable = await _context.Categories.AnyAsync(c => (c.Name == dto.Name && c.Description == dto.Description && c.IsActive == dto.IsActive));
+         if (isAvailable)
+             throw new InvalidOperationException("Category already exists");
          items.Name = dto.Name;
          items.Description = dto.Description ;
          items.IsActive = dto.IsActive;
          _context.Categories.Update(items);
-         await _context.SaveChangesAsync();
+        return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
         var items = await _context.Categories.FirstOrDefaultAsync(e => e.Id == id);
         if (items == null)
             throw new InvalidOperationException("Cannot delete an item with the given Id: {id}");
         _context.Categories.Remove(items);
-        await _context.SaveChangesAsync();
+       return await _context.SaveChangesAsync() > 0;
     }
 }

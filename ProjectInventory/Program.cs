@@ -28,6 +28,10 @@ builder.Services.AddScoped<IStakeHolderRepository, StakeHolderRepository>();
 builder.Services.AddScoped<IStakeHolderService, StakeHolderService>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IPurchaseService, PurchaseService>();
+builder.Services.AddScoped<IStockMovementService, StockMovementService>();
+builder.Services.AddScoped<ISalesService, SalesService>();
+builder.Services.AddScoped<ISalesRepository, SalesRepository>();
 
 var app = builder.Build();
 
@@ -48,6 +52,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Product}/{action=Index}/{id?}");
+    pattern: "{controller=Sales}/{action=Index}/{id?}");
 
 app.Run();

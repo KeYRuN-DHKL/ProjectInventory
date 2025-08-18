@@ -1,0 +1,59 @@
+@model System.Collections.Generic.List<ProjectInventory.Entities.Purchase>
+
+@{
+    ViewData["Title"] = "Purchases";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Purchase List</h2>
+        <a asp-action="Create" class="btn btn-primary">+ New Purchase</a>
+    </div>
+
+    <table class="table table-striped table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Invoice Number</th>
+                <th>Supplier</th>
+                <th>Transaction Date</th>
+                <th>Total Amount</th>
+                <th>Discount</th>
+                <th>Tax</th>
+                <th>Grand Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                foreach (var purchase in Model)
+                {
+                    <tr>
+                        <td>@purchase.InvoiceNumber</td>
+                        <td>@purchase.TransactionDate.ToString("yyyy-MM-dd")</td>
+                        <td>@purchase.TotalAmount.ToString("0.00")</td>
+                        <td>@purchase.DiscountAmount.ToString("0.00")</td>
+                        <td>@purchase.TaxAmount.ToString("0.00")</td>
+                        <td>@(purchase.TotalAmount + purchase.TaxAmount - purchase.DiscountAmount)</td>
+                        <td>@purchase.Status</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@purchase.Id" class="btn btn-sm btn-info">View</a>
+                            <a asp-action="Edit" asp-route-id="@purchase.Id" class="btn btn-sm btn-warning">Edit</a>
+                            <form asp-action="Delete" asp-route-id="@purchase.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" class="text-center">No purchases found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
