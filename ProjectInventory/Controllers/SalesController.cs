@@ -38,7 +38,7 @@ public class SalesController : Controller
             var vm = new SalesVm();
             vm.Products = await _productRepository.GetAllSelectListAsync();
             vm.StakeHolders = await _stakeHolderRepository.GetAllSelectListAsync();
-            var transactionDate = DateOnly.FromDateTime(DateTime.Now);
+            vm.TransactionDate = DateOnly.FromDateTime(DateTime.Now);
             var product = await _productRepository.GetAllAsync();
             vm.ProductUnitMap = product.ToDictionary(
                 p => p.Id.ToString(),
@@ -86,7 +86,6 @@ public class SalesController : Controller
             var sales = await _salesService.CreateAsync(salesDto);
             var stockMovementsDto = vm.StockMovements.Select(sm => new StockMovementDto
             {
-
                 ProductId = sm.ProductId,
                 Quantity = sm.Quantity,
                 MovementType = MovementType.Sale,

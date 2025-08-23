@@ -21,4 +21,7 @@ public class ApplicationDbContext : DbContext
     
     public DbSet<Sale> Sales { get; set; }
     
+    public DbSet<Adjustment> Adjustments { get; set; }
+    
+    public DbSet<Opening> Openings { get; set; }
 }

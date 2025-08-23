@@ -1,0 +1,162 @@
+@model ProjectInventory.Models.AdjustmentVm
+
+@{
+    ViewData["Title"] = "Stock Adjustment";
+    var productUnitJson = Json.Serialize(Model.ProductUnitMap);
+}
+
+<form asp-action="Create" method="post">
+    <div class="container bg-white p-4 rounded shadow-sm mt-4" style="max-width: 100%;">
+        <h3 class="mb-4 text-center text-primary">Stock Adjustment</h3>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label asp-for="InvoiceNo" class="form-label">Invoice No.</label>
+                <input asp-for="InvoiceNo" class="form-control" readonly />
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Date" class="form-label">Date</label>
+                <input asp-for="Date" type="date" class="form-control" />
+            </div>
+        </div>
+
+        <h5 class="text-secondary mb-3">Stock Movements</h5>
+
+        <table class="table table-bordered align-middle text-center" id="stock-movement-table">
+            <thead class="table-light">
+            <tr>
+                <th style="width: 40%;">Product</th>
+                <th style="width: 10%;">Unit</th>
+                <th style="width: 10%;">Stock</th>
+
+                <th style="width: 15%;">Quantity</th>
+                <th style="width: 15%;">Rate</th>
+                <th style="width: 15%;">Total</th>
+                <th style="width: 5%;">Action</th>
+            </tr>
+            </thead>
+            <tbody id="movement-body">
+            <!-- JS will insert rows -->
+            </tbody>
+        </table>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label asp-for="Amount" class="form-label fw-semibold">Total Amount</label>
+                <input asp-for="Amount" class="form-control" readonly />
+            </div>
+            <div class="col-md-6 d-flex justify-content-end align-items-end">
+                <button type="button" class="btn btn-outline-primary" id="add-row">+ Add Item</button>
+            </div>
+        </div>
+        <div>
+            <label asp-for="Description" class="form-label">Remarks</label>
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="d-grid">
+            <button type="submit" class="btn btn-outline-success ">Save</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script>
+        let index = 0;
+        const productUnitMap = @Html.Raw(productUnitJson);
+        const products = @Html.Raw(Json.Serialize(Model.Products));
+
+        function getProductOptions() {
+            return products.map(p => `<option value="${p.value}">${p.text}</option>`).join('');
+        }
+
+        
+
+        function addRow() {
+            const row = `
+                <tr>
+                    <td>
+                        <select name="StockMovements[${index}].ProductId" class="form-select product-select" data-index="${index}" required>
+                            <option value="">Select</option>
+                            ${getProductOptions()}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control unit-text" readonly />
+                    </td>
+<td>
+                        <select name="StockMovements[${index}].Stock" class="form-select Stock-select" data-index="${index}"  required>
+                            <option value="">Select</option>
+                            <option value="IN">IN</option>
+                             <option value="OUT">Out</option>
+                           
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" name="StockMovements[${index}].Quantity" class="form-control quantity" value="0" step="0.01" min="0.1" required/>
+                    </td>
+                    <td>
+                        <input type="number" name="StockMovements[${index}].Rate" class="form-control rate" value="0" step="0.01" min="0" required/>
+                    </td>
+                    <td>
+                        <input type="text" class="form-control total" readonly value="0.00" />
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger remove-row">X</button>
+                    </td>
+                </tr>`;
+            $("#movement-body").append(row);
+            index++;
+        }
+
+        function calculateAmount() {
+            let totalAmount = 0;
+            $(".total").each(function () {
+                const val = parseFloat($(this).val()) || 0;
+                totalAmount += val;
+            });
+            $("input[name='Amount']").val(totalAmount.toFixed(2));
+        }
+
+        $(document).on("change", ".product-select", function () {
+            const selectedProductId = $(this).val();
+            const row = $(this).closest("tr");
+            const unit = productUnitMap[selectedProductId] || "";
+            row.find(".unit-text").val(unit);
+        });
+
+        $(document).on("click", "#add-row", function () {
+            addRow();
+        });
+
+        $(document).on("click", ".remove-row", function () {
+            $(this).closest("tr").remove();
+            reindexRows();
+            calculateAmount();
+        });
+
+        $(document).on("input", ".quantity, .rate", function () {
+            const row = $(this).closest("tr");
+            const qty = parseFloat(row.find(".quantity").val()) || 0;
+            const rate = parseFloat(row.find(".rate").val()) || 0;
+            const total = qty * rate;
+            row.find(".total").val(total.toFixed(2));
+            calculateAmount();
+        });
+
+        $(document).ready(function () {
+            addRow(); // initial row
+        });
+        function reindexRows() {
+            $("#movement-body tr").each(function (i) {
+                $(this).find("select[name^='StockMovements'], input[name^='StockMovements']").each(function () {
+                    const name = $(this).attr("name");
+                    const newName = name.replace(/\[\d+\]/, `[${i}]`);
+                    $(this).attr("name", newName);
+                });
+            });
+            index = $("#movement-body tr").length;
+        }
+    </script>
+}

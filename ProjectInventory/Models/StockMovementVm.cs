@@ -8,5 +8,5 @@ public class StockMovementVm
     public decimal Quantity { get; set; }
     public decimal Rate { get; set; }
     public decimal? VatPercentage { get; set; }
-    public Stock? Stock{ get; set; }
+    public Stock Stock{ get; set; } 
 }

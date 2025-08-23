@@ -32,6 +32,8 @@ builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IStockMovementService, StockMovementService>();
 builder.Services.AddScoped<ISalesService, SalesService>();
 builder.Services.AddScoped<ISalesRepository, SalesRepository>();
+builder.Services.AddScoped<IAdjustmentService, AdjustmentService>();
+builder.Services.AddScoped<IOpeningService, OpeningService>();
 
 var app = builder.Build();
 
@@ -52,6 +54,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Sales}/{action=Index}/{id?}");
+    pattern: "{controller=Opening}/{action=Create}/{id?}");
 
 app.Run();
