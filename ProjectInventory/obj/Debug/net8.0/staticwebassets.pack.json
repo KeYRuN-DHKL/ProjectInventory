@@ -13,6 +13,10 @@
       "PackagePath": "staticwebassets\\ProjectInventory.bundle.scp.css"
     },
     {
+      "Id": "C:\\Users\\LOQ\\RiderProjects\\ProjectInventory\\ProjectInventory\\wwwroot\\css\\menubar.css",
+      "PackagePath": "staticwebassets\\css\\menubar.css"
+    },
+    {
       "Id": "C:\\Users\\LOQ\\RiderProjects\\ProjectInventory\\ProjectInventory\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },

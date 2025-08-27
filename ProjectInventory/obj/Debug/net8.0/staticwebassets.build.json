@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "I3sNl19B3zDUmYSPdosIWzaJfBMLyCld/nvgrMHLY3I=",
+  "Hash": "LkUXoOTJkS78zTXA+uo492fXfxldyk3N6wOd9Im3S4o=",
   "Source": "ProjectInventory",
   "BasePath": "_content/ProjectInventory",
   "Mode": "Default",
@@ -129,6 +129,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "C:\\Users\\LOQ\\RiderProjects\\ProjectInventory\\ProjectInventory\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\ProjectInventory.bundle.scp.css"
+    },
+    {
+      "Identity": "C:\\Users\\LOQ\\RiderProjects\\ProjectInventory\\ProjectInventory\\wwwroot\\css\\menubar.css",
+      "SourceId": "ProjectInventory",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\LOQ\\RiderProjects\\ProjectInventory\\ProjectInventory\\wwwroot\\",
+      "BasePath": "_content/ProjectInventory",
+      "RelativePath": "css/menubar.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\css\\menubar.css"
     },
     {
       "Identity": "C:\\Users\\LOQ\\RiderProjects\\ProjectInventory\\ProjectInventory\\wwwroot\\css\\site.css",

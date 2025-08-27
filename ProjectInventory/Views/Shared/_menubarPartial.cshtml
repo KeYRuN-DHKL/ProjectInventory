@@ -1,0 +1,18 @@
+<nav id="sidebar" class="sidebar">
+    <div class="sidebar-header d-flex justify-content-between align-items-center px-3 py-3 border-bottom">
+        <h4>IMS</h4>
+        <button id="sidebarToggle" class="btn btn-outline-light btn-sm">
+            &#9776; <!-- simple hamburger icon -->
+        </button>
+    </div>
+
+    <ul class="list-unstyled components mt-3">
+        <li><a href="@Url.Action("Index", "Unit")">Unit</a></li>
+        <li><a href="@Url.Action("Index", "Category")">Category</a></li>
+        <li><a href="@Url.Action("Index", "Product")">Product</a></li>
+        <li><a href="@Url.Action("Index", "Purchase")">Purchase</a></li>
+        <li><a href="@Url.Action("Index", "Sales")">Sales</a></li>
+        <li><a href="@Url.Action("Create", "Adjustment")">Adjustment</a></li>
+        <li><a href="@Url.Action("Create", "Damage")">Damage</a></li>
+    </ul>
+</nav>

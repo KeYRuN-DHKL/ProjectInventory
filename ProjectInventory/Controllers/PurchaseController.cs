@@ -12,19 +12,22 @@ public class PurchaseController : Controller
     private readonly IProductRepository _productRepository;
     private readonly IStakeHolderRepository _stakeholderRepository;
     private readonly IPurchaseService _purchaseService;
+    private readonly IPurchaseRepository _purchaseRepository;
     private readonly IStockMovementService _stockMovementService;
 
-    public PurchaseController(IProductRepository productRepository, IStakeHolderRepository stakeholderRepository, IPurchaseService purchaseService, IStockMovementService stockMovementService)
+    public PurchaseController(IProductRepository productRepository, IStakeHolderRepository stakeholderRepository, IPurchaseService purchaseService, IStockMovementService stockMovementService, IPurchaseRepository purchaseRepository)
     {
         _productRepository = productRepository;
         _stakeholderRepository = stakeholderRepository;
         _purchaseService = purchaseService;
         _stockMovementService = stockMovementService;
+        _purchaseRepository = purchaseRepository;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        var items = await _purchaseRepository.GetAllAsync();
+        return View(items);
     }
 
     public async Task<IActionResult> Create()

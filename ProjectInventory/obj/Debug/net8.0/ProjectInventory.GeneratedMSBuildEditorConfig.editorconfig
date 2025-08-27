@@ -46,6 +46,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2F0ZWdvcnlcUmVtb3ZlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/LOQ/RiderProjects/ProjectInventory/ProjectInventory/Views/Damage/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGFtYWdlXENyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/LOQ/RiderProjects/ProjectInventory/ProjectInventory/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -92,6 +96,14 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/LOQ/RiderProjects/ProjectInventory/ProjectInventory/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/LOQ/RiderProjects/ProjectInventory/ProjectInventory/Views/Shared/_menubarPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9tZW51YmFyUGFydGlhbC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/LOQ/RiderProjects/ProjectInventory/ProjectInventory/Views/Shared/_navbarPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9uYXZiYXJQYXJ0aWFsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/LOQ/RiderProjects/ProjectInventory/ProjectInventory/Views/Shared/_ValidationScriptsPartial.cshtml]

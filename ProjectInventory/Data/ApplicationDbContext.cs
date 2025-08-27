@@ -24,4 +24,6 @@ public class ApplicationDbContext : DbContext
     public DbSet<Adjustment> Adjustments { get; set; }
     
     public DbSet<Opening> Openings { get; set; }
+    
+    public DbSet<Damage> Damages { get; set; }
 }
