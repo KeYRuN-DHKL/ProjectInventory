@@ -40,7 +40,7 @@ public class ProductService : IProductService
     {
         var product = await _context.Products.FindAsync(id);
         if (product == null)
-            throw new InvalidOperationException($"Product not available");
+            throw new KeyNotFoundException($"Product not available");
         
         var isProductExisted = await _context.Products.AnyAsync(p => p.Code == dto.Code && p.Name == dto.Name);
         if (isProductExisted)
@@ -56,8 +56,7 @@ public class ProductService : IProductService
         product.UpdatedAt = DateTime.UtcNow;
 
         _context.Products.Update(product);
-        var isSaved = await _context.SaveChangesAsync() > 0;
-        return isSaved;
+        return await _context.SaveChangesAsync() > 0;
     }
     public async Task<bool> DeleteAsync(Guid id)
     {

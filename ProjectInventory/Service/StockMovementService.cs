@@ -35,4 +35,33 @@ public class StockMovementService : IStockMovementService
         await _context.StockMovements.AddRangeAsync(stockMovementEntity);
         return await _context.SaveChangesAsync() > 0;
     }
+
+    public async Task<bool> UpdateAsync(StockMovementDto dto)
+    {
+        var stockMovement = await _context.StockMovements.FindAsync(dto.Id);
+        if (stockMovement == null)
+        {
+            throw new KeyNotFoundException($"StockMovement not found");
+        }
+
+        stockMovement.Date = dto.Date;
+        stockMovement.ProductId = dto.ProductId;
+        stockMovement.Quantity = dto.Quantity;
+        stockMovement.Rate = dto.Rate;
+        stockMovement.VatPercentage = dto.VatPercentage;
+        stockMovement.Stock = dto.Stock;
+        stockMovement.InvoiceNumber = dto.InvoiceNumber ?? stockMovement.InvoiceNumber;
+
+        _context.StockMovements.Update(stockMovement);
+        return await _context.SaveChangesAsync() > 0;
+    }
+
+    public async Task<bool> DeleteAsync(Guid id)
+    {
+        var stockMovement = await _context.StockMovements.FindAsync(id);
+        if (stockMovement == null)
+            throw new KeyNotFoundException($"Unable to find the stockMovement");
+        _context.StockMovements.Remove(stockMovement);
+        return await _context.SaveChangesAsync() > 0;
+    }
 }

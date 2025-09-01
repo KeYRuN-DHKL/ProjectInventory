@@ -6,4 +6,6 @@ namespace ProjectInventory.Service.Interface;
 public interface IStockMovementService
 {
     Task<bool> AddAsync(List<StockMovementDto> dto);
+    Task<bool> UpdateAsync(StockMovementDto dto);
+    Task<bool> DeleteAsync(Guid id);
 }

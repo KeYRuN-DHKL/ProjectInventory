@@ -24,10 +24,22 @@ public class PurchaseController : Controller
         _purchaseRepository = purchaseRepository;
     }
 
-    public async Task<IActionResult> Index()
+    public IActionResult Index()
     {
-        var items = await _purchaseRepository.GetAllAsync();
-        return View(items);
+        var items = _purchaseRepository.GetQueryAbleData();
+        var vm = items.Select(p => new PurchaseIndexVm
+        {
+            Id = p.Id,
+            StakeHolderName = p.StakeHolder.Name,
+            Description = p.Description,
+            DiscountAmount = p.DiscountAmount,
+            InvoiceNumber = p.InvoiceNumber,
+            TaxableAmount = p.TaxableAmount,
+            TaxAmount = p.TaxAmount,
+            TotalAmount = p.TotalAmount,
+            TransactionDate = p.TransactionDate
+        }).ToList();
+        return View(vm);
     }
 
     public async Task<IActionResult> Create()

@@ -1,4 +1,4 @@
-@model System.Collections.Generic.List<ProjectInventory.Entities.Purchase>
+@model List<PurchaseIndexVm>
 
 @{
     ViewData["Title"] = "Purchases";
@@ -20,7 +20,6 @@
                 <th>Discount</th>
                 <th>Tax</th>
                 <th>Grand Total</th>
-                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -31,13 +30,12 @@
                 {
                     <tr>
                         <td>@purchase.InvoiceNumber</td>
-                        <td>@purchase.StakeHolderId</td>
+                        <td>@purchase.StakeHolderName</td>
                         <td>@purchase.TransactionDate.ToString("yyyy-MM-dd")</td>
                         <td>@purchase.TotalAmount.ToString("0.00")</td>
                         <td>@purchase.DiscountAmount.ToString("0.00")</td>
                         <td>@purchase.TaxAmount.ToString("0.00")</td>
                         <td>@(purchase.TotalAmount + purchase.TaxAmount - purchase.DiscountAmount)</td>
-                        <td>@purchase.Status</td>
                         <td>
                             <a asp-action="Details" asp-route-id="@purchase.Id" class="btn btn-sm btn-info">View</a>
                             <a asp-action="Edit" asp-route-id="@purchase.Id" class="btn btn-sm btn-warning">Edit</a>
