@@ -10,4 +10,6 @@ public interface IStakeHolderRepository
     Task<StakeHolder?> GetByIdAsync(Guid id);
 
     Task<List<SelectListItem>> GetAllSelectListAsync();
+
+    Task<String> GetStakeHolderName(Guid id);
 }

@@ -64,4 +64,24 @@ public class StockMovementService : IStockMovementService
         _context.StockMovements.Remove(stockMovement);
         return await _context.SaveChangesAsync() > 0;
     }
+
+    public async Task<bool> AddAsync(StockMovementDto dto)
+    {
+        var stockMovement = new StockMovement
+        {
+            Id = Guid.NewGuid(),
+            CreatedAt = DateTime.UtcNow,
+            ProductId = dto.ProductId,
+            Quantity = dto.Quantity,
+            MovementType = dto.MovementType,
+            InvoiceNumber = dto.InvoiceNumber ?? "",
+            Rate = dto.Rate,
+            Date = dto.Date,
+            VatPercentage = dto.VatPercentage,
+            TypeId = dto.TypeId,
+            Stock = dto.Stock,
+        };
+        _context.StockMovements.Add(stockMovement);
+        return await _context.SaveChangesAsync() > 0;
+    }
 }

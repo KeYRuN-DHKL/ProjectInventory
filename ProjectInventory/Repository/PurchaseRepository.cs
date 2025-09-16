@@ -28,6 +28,17 @@ public class PurchaseRepository : IPurchaseRepository
 
    public async Task<Purchase> FindById(Guid id)
    {
-      return await _context.Purchases.FindAsync(id);
+      var purchase =  await _context.Purchases.FindAsync(id);
+      if (purchase == null)
+         throw new KeyNotFoundException("Purchase not found");
+      return purchase;
+   }
+   
+   public IQueryable<Purchase> FindWithQueryable(Guid id)
+   {
+      var purchase =  _context.Purchases.Include(p => p.StakeHolder).Where(p => p.Id == id);
+      if (purchase == null)
+         throw new KeyNotFoundException("Purchase not found");
+      return purchase;
    }
 }

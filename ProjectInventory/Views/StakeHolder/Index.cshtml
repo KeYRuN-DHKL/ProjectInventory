@@ -52,10 +52,7 @@
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@items.Id" class="btn btn-secondary">Edit</a>
-                    @* <Form asp-action="Remove" asp-route-id="@items.Id" method="Post" class="d-inline"> *@
-                    @*     @Html.AntiForgeryToken() *@
-                        <button type="submit" class="btn btn-secondary">Delete</button>
-                    @* </Form> *@
+                    <a asp-action="Remove" asp-route-id="@items.Id" class="btn btn-secondary">Remove</a>
                 </td>
             </tr>
         } 

@@ -36,6 +36,7 @@ builder.Services.AddScoped<ISalesRepository, SalesRepository>();
 builder.Services.AddScoped<IAdjustmentService, AdjustmentService>();
 builder.Services.AddScoped<IOpeningService, OpeningService>();
 builder.Services.AddScoped<IDamageService, DamageService>();
+builder.Services.AddScoped<IStockMovementRepository, StockMovementRepository>();
 
 var app = builder.Build();
 

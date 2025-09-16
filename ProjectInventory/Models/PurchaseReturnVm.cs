@@ -1,25 +1,20 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
-using ProjectInventory.Enum;
 
 namespace ProjectInventory.Models;
 
-public class PurchaseEditvm
+public class PurchaseReturnVm
 {
     public Guid Id { get; set; }
     public string InvoiceNumber { get; set; } = string.Empty;
     public DateOnly TransactionDate { get; set; }
-    public Guid StakeHolderId { get; set; }
+    public string StakeHolderName { get; set; } = string.Empty;
     public decimal TotalAmount { get; set; }
     public decimal TaxableAmount { get; set; }
     public decimal TaxAmount { get; set; }
     public decimal DiscountAmount { get; set; }
     public string Description { get; set; } = string.Empty;
     public decimal GrandTotal => TotalAmount + TaxAmount - DiscountAmount;
-    
-    public List<SelectListItem>? Products { get; set; } = new List<SelectListItem>();
-
-    public List<SelectListItem>? StakeHolders { get; set; } = new List<SelectListItem>();
     public Dictionary<string, string>? ProductUnitMap { get; set; } = new Dictionary<string, string>();
     
-    public List<StockMovementEditVm> StockMovements { get; set; } = new List<StockMovementEditVm>();
+    public List<StockMovementReturnVm> StockMovements { get; set; } = new List<StockMovementReturnVm>();
 }

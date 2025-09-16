@@ -19,6 +19,8 @@ public class StockMovementRepository : IStockMovementRepository
     {
         return await _context.StockMovements
             .Where(s => s.TypeId == id)
+            .Include(s => s.Product)
+            .ThenInclude(s => s.Unit)
             .ToListAsync();
     }
 

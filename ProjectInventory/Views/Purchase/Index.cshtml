@@ -39,10 +39,7 @@
                         <td>
                             <a asp-action="Details" asp-route-id="@purchase.Id" class="btn btn-sm btn-info">View</a>
                             <a asp-action="Edit" asp-route-id="@purchase.Id" class="btn btn-sm btn-warning">Edit</a>
-                            <form asp-action="Delete" asp-route-id="@purchase.Id" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?');">Delete</button>
-                            </form>
+                            <a class="btn btn-secondary" asp-action="Return" asp-route-id="@purchase.Id">Return</a>
                         </td>
                     </tr>
                 }

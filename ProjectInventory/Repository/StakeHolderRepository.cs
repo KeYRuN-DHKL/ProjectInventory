@@ -37,4 +37,12 @@ public class StakeHolderRepository : IStakeHolderRepository
                 Text = s.Name
             }).ToListAsync();
     }
+
+    public async Task<string> GetStakeHolderName(Guid id)
+    {
+        var stakeHolder = await _context.StakeHolders.FindAsync(id);
+        if (stakeHolder == null)
+            throw new KeyNotFoundException("stakeholder not found...");
+        return stakeHolder.Name;
+    }
 }

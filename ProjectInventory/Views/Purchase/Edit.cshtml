@@ -1,19 +1,20 @@
-@model PurchaseVm
+@model PurchaseEditvm
 
 @{
-    ViewData["Title"] = "Purchase";
+    ViewData["Title"] = "Edit Purchase";
     var productUnitJson = Json.Serialize(Model.ProductUnitMap);
-    var productsJson = Json.Serialize(Model.Products);
 }
 
-<form asp-action="Create" method="post">
+<form asp-action="Edit" method="post">
     <div class="container bg-white p-4 rounded shadow-sm mt-4" style="max-width: 100%;">
-        <h3 class="mb-4 text-center text-primary">Create Purchase</h3>
+        <h3 class="mb-4 text-center text-primary">Edit Purchase</h3>
+
+        <input type="hidden" asp-for="Id" />
 
         <div class="row mb-4">
             <div class="col-md-4">
                 <label asp-for="InvoiceNumber" class="form-label">Invoice No.</label>
-                <input asp-for="InvoiceNumber" class="form-control" required min="1" />
+                <input asp-for="InvoiceNumber" class="form-control" />
             </div>
             <div class="col-md-4">
                 <label asp-for="StakeHolderId" class="form-label">Vendor</label>
@@ -27,25 +28,79 @@
             </div>
         </div>
 
-        <h5 class="text-secondary text-center mb-3">Stock Movements</h5>
+        <h5 class="text-secondary mb-3">Stock Movements</h5>
 
-        <table class="table table-bordered align-middle text-middle" id="stock-movement-table">
+        <table class="table table-bordered align-middle text-center" id="stock-movement-table">
             <thead class="table-light">
-                <tr>
-                    <th style="width: 25%;">Product</th>
-                    <th>Unit</th>
-                    <th>Qty</th>
-                    <th>Rate</th>
-                    <th>Amount</th>
-                    <th>VAT (%)</th>
-                    <th>VAT Amt</th>
-                    <th>Total</th>
-                    <th>Action</th>
-                </tr>
+            <tr>
+                <th style="width: 25%;">Product</th>
+                <th>Unit</th>
+                <th>Qty</th>
+                <th>Rate</th>
+                <th>Amount</th>
+                <th>VAT (%)</th>
+                <th>VAT Amt</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
             </thead>
             <tbody id="movement-body">
             
-            
+            @{
+                int j = 0;
+                @* foreach (var item in Model.StockMovements) *@
+                @* { *@
+                @*     <tr> *@
+                @*         <td> *@
+                @*             <select asp-for="StockMovements[j].ProductId" class="form-select product-select" data-index="@j" asp-items="@Model.Products"> *@
+                @*                 <option value="">-- Select --</option> *@
+                @*             </select> *@
+                @*         </td> *@
+                @*     </tr> *@
+                @*     j++; *@
+                @* *@
+                @* } *@
+
+                for (int i = j; i < Model.StockMovements.Count; i++)
+                {
+                    var item = Model.StockMovements[i];
+                    var selectList = Model.Products[i];
+                    <tr>
+                        <input asp-for="StockMovements[i].Id" type="hidden"/>
+                        <td>
+                            <select name="StockMovements[@i].ProductId" asp-for="StockMovements[i].ProductId" class="form-select product-select" data-index="@i" asp-items="@Model.Products" required>
+                                <option value="">-- Select --</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control unit-text" value="@item.UnitName" readonly/>
+                        </td>
+                        <td>
+                            <input type="number" name="StockMovements[@i].Quantity" class="form-control quantity" value="@item.Quantity" step="0.01" min="0.01" required/>
+                        </td>
+                        <td>
+                            <input type="number" name="StockMovements[@i].Rate" class="form-control rate" value="@item.Rate" step="0.01" min="0" required/>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control amount" readonly value="@(item.Quantity * item.Rate)"/>
+                        </td>
+                        <td>
+                            <input type="number" name="StockMovements[@i].VatPercentage" class="form-control vat-percentage" value="@item.VatPercentage" step="0.01" min="0" required/>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control vat-amount" readonly value="@(item.Quantity * item.Rate * item.VatPercentage / 100)" readonly/>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control row-total" readonly value="@(item.Quantity * item.Rate + (item.Quantity * item.Rate * item.VatPercentage / 100))"/>
+                        </td>
+                        
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger remove-row">X</button>
+                        </td>
+                        
+                    </tr>
+                }
+            }
             </tbody>
         </table>
 
@@ -54,7 +109,6 @@
                 <button type="button" class="btn btn-outline-primary" id="add-row">+ Add Item</button>
             </div>
         </div>
-
         <div class="row mb-3">
             <div class="col-md-2">
                 <label asp-for="TotalAmount" class="form-label fw-semibold">Sub Total</label>
@@ -77,14 +131,14 @@
                 <input asp-for="TotalAmount" class="form-control" readonly/>
             </div>
         </div>
-
         <div>
             <label asp-for="Description" class="form-label">Remarks</label>
             <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-        </div>
+        </div><br/>
+        
 
-        <div class="d-grid mt-3">
-            <button asp-action="Create" type="submit" class="btn btn-outline-success">Save</button>
+        <div class="d-grid">
+            <button type="submit" class="btn btn-outline-success">Save</button>
         </div>
     </div>
 </form>
@@ -92,12 +146,12 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script>
-        let index = 0;
+        let index = @Model.StockMovements.Count;
         const productUnitMap = @Html.Raw(productUnitJson);
-        const products = @Html.Raw(productsJson);
+        const products = @Html.Raw(Json.Serialize(Model.Products)); // fallback for JS add-row
 
-        function getProductOptions() {
-            return products.map(p => `<option value="${p.value}">${p.text}</option>`).join('');
+        function getProductOptions(selectedValue = "") {
+            return products.map(p => `<option value="${p.value}" ${p.value === selectedValue ? 'selected' : ''}>${p.text}</option>`).join('');
         }
 
         function addRow() {
@@ -135,18 +189,17 @@
                     </td>
                 </tr>`;
             $("#movement-body").append(row);
-            index++;
+            reindexRows();
         }
 
         function calculateRow(row) {
             const qty = parseFloat(row.find(".quantity").val()) || 0;
             const rate = parseFloat(row.find(".rate").val()) || 0;
             const vatPercent = parseFloat(row.find(".vat-percentage").val()) || 0;
-            const discount = parseFloat(row.find(".discount").val()) || 0;
 
             const amount = qty * rate;
             const vatAmt = (amount * vatPercent) / 100;
-            const total = amount + vatAmt - discount;
+            const total = amount + vatAmt;
 
             row.find(".amount").val(amount.toFixed(2));
             row.find(".vat-amount").val(vatAmt.toFixed(2));
@@ -156,6 +209,7 @@
         function calculateAmount() {
             let subTotal = 0;
             let tax = 0;
+            let taxableAmount = 0;
 
             $("#movement-body tr").each(function () {
                 const row = $(this);
@@ -163,19 +217,25 @@
 
                 const amount = parseFloat(row.find(".amount").val()) || 0;
                 const vat = parseFloat(row.find(".vat-amount").val()) || 0;
+                const vatPercentage = parseFloat(row.find(".vat-percentage").val()) || 0;
 
                 subTotal += amount;
                 tax += vat;
+
+                if (vatPercentage !== 0) {
+                    taxableAmount += amount;
+                }
             });
 
             const discount = parseFloat($(".discount").val()) || 0;
             const grandTotal = subTotal + tax - discount;
 
             $("input[name='Amount']").val(subTotal.toFixed(2));
-            $("input[name='TaxableAmount']").val(subTotal.toFixed(2));
+            $("input[name='TaxableAmount']").val(taxableAmount.toFixed(2));
             $("input[name='TaxAmount']").val(tax.toFixed(2));
             $("input[name='TotalAmount']").val(grandTotal.toFixed(2));
         }
+
 
 
         $(document).on("change", ".product-select", function () {
@@ -195,29 +255,36 @@
             calculateAmount();
         });
 
-        $(document).on("input", ".quantity, .discount, .rate, .vat-percentage", function () {
+        $(document).on("input", ".quantity, .rate, .vat-percentage", function () {
             const row = $(this).closest("tr");
             calculateRow(row);
             calculateAmount();
         });
 
+        $(document).on("input", ".discount", function () {
+            calculateAmount(); // apply global discount change
+        });
+
         function reindexRows() {
-            $("#movement-body tr").each(function (i) {
-                $(this).find("select, input").each(function () {
+            $("#movement-body tr").each(function (i, row) {
+                $(row).find("select, input").each(function () {
                     const name = $(this).attr("name");
                     if (name) {
                         const newName = name.replace(/\[\d+\]/, `[${i}]`);
                         $(this).attr("name", newName);
                     }
+
+                    if ($(this).data("index") !== undefined) {
+                        $(this).attr("data-index", i);
+                    }
                 });
             });
+
             index = $("#movement-body tr").length;
         }
 
         $(document).ready(function () {
-            addRow();
+            calculateAmount(); // Initial calculation
         });
-        
-
     </script>
 }
