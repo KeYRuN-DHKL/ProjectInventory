@@ -119,7 +119,7 @@ public class PurchaseController : Controller
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", "An unexpected error occured {ex.Message}");
+            ModelState.AddModelError("", $"An unexpected error occured {ex.Message}");
             vm.Products= await _productRepository.GetAllSelectListAsync();
             vm.StakeHolders = await _stakeholderRepository.GetAllSelectListAsync();
             vm.TransactionDate = DateOnly.FromDateTime(DateTime.Now);
@@ -281,6 +281,7 @@ public class PurchaseController : Controller
                 Description = purchase.Description,
                 DiscountAmount = purchase.DiscountAmount,
                 StakeHolderName = await _stakeholderRepository.GetStakeHolderName(purchase.StakeHolderId),
+                StakeHolderId = purchase.StakeHolderId,
                 TotalAmount = purchase.TotalAmount,
                 TaxableAmount = purchase.TaxableAmount,
                 TaxAmount = purchase.TaxAmount,
@@ -294,7 +295,7 @@ public class PurchaseController : Controller
                     ProductName = sm.Product.Name,
                     Rate = sm.Rate,
                     VatPercentage = sm.VatPercentage,
-                    UnitName = sm.Product.Unit.Name
+                    UnitName = sm.Product.Unit.Name,
                 }).ToList(),
             };
             var allProducts = await _productRepository.GetAllAsync();
@@ -309,5 +310,112 @@ public class PurchaseController : Controller
             _toastNotification.AddErrorToastMessage("An unexpected error occured..." + ex.Message);
             return RedirectToAction("Index");
         }
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Return(PurchaseReturnVm viewModel)
+    {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    var purchaseData = await _purchaseRepository.FindById(viewModel.Id);
+                    var purchaseItems = await _stockMovementRepository.FindByIdAsync(viewModel.Id);
+                    var vm = new PurchaseReturnVm
+                    {
+                    Id = purchaseData.Id,
+                    InvoiceNumber = purchaseData.InvoiceNumber,
+                    Description = purchaseData.Description,
+                    DiscountAmount = purchaseData.DiscountAmount,
+                    StakeHolderName = await _stakeholderRepository.GetStakeHolderName(purchaseData.StakeHolderId),
+                    TotalAmount = purchaseData.TotalAmount,
+                    TaxableAmount = purchaseData.TaxableAmount,
+                    TaxAmount = purchaseData.TaxAmount,
+                    TransactionDate = purchaseData.TransactionDate,
+
+                    StockMovements = purchaseItems.Select(sm => new StockMovementReturnVm
+                    {
+                        Id = sm.Id,
+                        ProductId = sm.ProductId,
+                        Quantity = sm.Quantity,
+                        ProductName = sm.Product.Name,
+                        Rate = sm.Rate,
+                        VatPercentage = sm.VatPercentage,
+                        UnitName = sm.Product.Unit.Name,
+                    }).ToList(),
+                    };
+                    var allProducts = await _productRepository.GetAllAsync();
+                    vm.ProductUnitMap = allProducts.ToDictionary(
+                        p => p.Id.ToString(),
+                        p => p.Unit.Symbol
+                    );
+                    return View(vm);
+                } 
+                
+                var purchaseDto = new PurchaseDto
+                {
+                InvoiceNumber = viewModel.InvoiceNumber,
+                Description = viewModel.Description ?? string.Empty,
+                TransactionDate = viewModel.TransactionDate,
+                StakeHolderId = viewModel.StakeHolderId,
+                TotalAmount = viewModel.TotalAmount,
+                DiscountAmount = viewModel.DiscountAmount,
+                TaxAmount = viewModel.TaxAmount,
+                TaxableAmount = viewModel.TaxableAmount,
+                Status = Status.Returned,
+                };
+
+            var purchase = await _purchaseService.CreateAsync(purchaseDto);
+            var stockMovementsDto = viewModel.StockMovements.Select(sm => new StockMovementDto
+            {
+
+                ProductId = sm.ProductId,
+                Quantity = sm.Quantity,
+                MovementType = MovementType.PurchaseReturn,
+                InvoiceNumber = viewModel.InvoiceNumber,
+                Rate = sm.Rate,
+                Date = viewModel.TransactionDate,
+                VatPercentage = sm.VatPercentage,
+                TypeId = purchase.Id,
+                Stock = Stock.Out,
+            }).ToList();
+            await _stockMovementService.AddAsync(stockMovementsDto);
+            return RedirectToAction("Index"); 
+            }
+            catch (Exception ex)
+            {
+                var purchase = await _purchaseRepository.FindById(viewModel.Id);
+                var purchaseItems = await _stockMovementRepository.FindByIdAsync(viewModel.Id);
+                var vm = new PurchaseReturnVm
+            {
+                Id = purchase.Id,
+                InvoiceNumber = purchase.InvoiceNumber,
+                Description = purchase.Description,
+                DiscountAmount = purchase.DiscountAmount,
+                StakeHolderName = await _stakeholderRepository.GetStakeHolderName(purchase.StakeHolderId),
+                TotalAmount = purchase.TotalAmount,
+                TaxableAmount = purchase.TaxableAmount,
+                TaxAmount = purchase.TaxAmount,
+                TransactionDate = purchase.TransactionDate,
+
+                StockMovements = purchaseItems.Select(sm => new StockMovementReturnVm
+                {
+                    Id = sm.Id,
+                    ProductId = sm.ProductId,
+                    Quantity = sm.Quantity,
+                    ProductName = sm.Product.Name,
+                    Rate = sm.Rate,
+                    VatPercentage = sm.VatPercentage,
+                    UnitName = sm.Product.Unit.Name,
+                }).ToList(),
+            };
+            var allProducts = await _productRepository.GetAllAsync();
+            vm.ProductUnitMap = allProducts.ToDictionary(
+                p => p.Id.ToString(),
+                p => p.Unit.Symbol
+            );
+            return View(vm);
+            }
     }
 }

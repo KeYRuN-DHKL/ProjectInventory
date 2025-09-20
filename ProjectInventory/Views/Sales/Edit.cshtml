@@ -1,28 +1,26 @@
-@model PurchaseReturnVm
+@model SalesEditVm
 
 @{
-    ViewData["Title"] = "Purchase Return";
+    ViewData["Title"] = "SalesEdit";
     var productUnitJson = Json.Serialize(Model.ProductUnitMap);
 }
 
-<form asp-action="Return" method="post">
+<form asp-action="Edit" method="post">
     <div class="container bg-white p-4 rounded shadow-sm mt-4" style="max-width: 100%;">
-        <h3 class="mb-4 text-center text-primary">Purchase Return</h3>
+        <h3 class="mb-4 text-center text-primary">Edit Sales</h3>
 
         <input type="hidden" asp-for="Id" />
 
         <div class="row mb-4">
             <div class="col-md-4">
-                <label asp-for="InvoiceNumber" class="form-label" >Invoice No.</label>
-                <input asp-for="InvoiceNumber" class="form-control" readonly />
+                <label asp-for="InvoiceNumber" class="form-label">Invoice No.</label>
+                <input asp-for="InvoiceNumber" class="form-control" />
             </div>
             <div class="col-md-4">
-                <label class="form-label">Vendor</label>
-                @* <select asp-for="StakeHolderId" class="form-select product-select" asp-items="Model.StakeHolders" readonly> *@
-                @*     <option value="">Select</option> *@
-                @* </select> *@
-                <input type="text" value="@Model.StakeHolderName" class="form-control" readonly/>
-                <input type="hidden" asp-for="StakeHolderId"/>
+                <label asp-for="StakeHolderId" class="form-label">Vendor</label>
+                <select asp-for="StakeHolderId" class="form-select product-select" asp-items="Model.StakeHolders" required>
+                    <option value="">Select</option>
+                </select>
             </div>
             <div class="col-md-4">
                 <label asp-for="TransactionDate" class="form-label">Date</label>
@@ -30,7 +28,7 @@
             </div>
         </div>
 
-        <h5 class="text-secondary text-center mb-3">Stock Movements</h5>
+        <h5 class="text-secondary mb-3">Stock Movements</h5>
 
         <table class="table table-bordered align-middle text-center" id="stock-movement-table">
             <thead class="table-light">
@@ -66,14 +64,13 @@
                 for (int i = j; i < Model.StockMovements.Count; i++)
                 {
                     var item = Model.StockMovements[i];
+                    var selectList = Model.Products[i];
                     <tr>
                         <input asp-for="StockMovements[i].Id" type="hidden"/>
                         <td>
-                            @* <select name="StockMovements[@i].ProductId" asp-for="StockMovements[i].ProductId" class="form-select product-select" data-index="@i" asp-items="@Model.Products" readonly> *@
-                            @*     <option value="">-- Select --</option> *@
-                            @* </select> *@
-                            <input type="text" value="@item.ProductName" readonly class="form-control"/>
-                            <input type="hidden" asp-for="StockMovements[i].ProductId"/>
+                            <select name="StockMovements[@i].ProductId" asp-for="StockMovements[i].ProductId" class="form-select product-select" data-index="@i" asp-items="@Model.Products" required>
+                                <option value="">-- Select --</option>
+                            </select>
                         </td>
                         <td>
                             <input type="text" class="form-control unit-text" value="@item.UnitName" readonly/>
@@ -82,13 +79,13 @@
                             <input type="number" name="StockMovements[@i].Quantity" class="form-control quantity" value="@item.Quantity" step="0.01" min="0.01" required/>
                         </td>
                         <td>
-                            <input type="number" name="StockMovements[@i].Rate" class="form-control rate" value="@item.Rate" step="0.01" min="0" readonly/>
+                            <input type="number" name="StockMovements[@i].Rate" class="form-control rate" value="@item.Rate" step="0.01" min="0" required/>
                         </td>
                         <td>
                             <input type="text" class="form-control amount" readonly value="@(item.Quantity * item.Rate)"/>
                         </td>
                         <td>
-                            <input type="number" name="StockMovements[@i].VatPercentage" class="form-control vat-percentage" value="@item.VatPercentage" step="0.01" min="0" readonly/>
+                            <input type="number" name="StockMovements[@i].VatPercentage" class="form-control vat-percentage" value="@item.VatPercentage" step="0.01" min="0" required/>
                         </td>
                         <td>
                             <input type="text" class="form-control vat-amount" readonly value="@(item.Quantity * item.Rate * item.VatPercentage / 100)" readonly/>
@@ -109,7 +106,7 @@
 
         <div class="row mb-4">
             <div class="col-12 d-flex justify-content-end">
-                @* <button type="button" class="btn btn-outline-primary" id="add-row">+ Add Item</button> *@
+                <button type="button" class="btn btn-outline-primary" id="add-row">+ Add Item</button>
             </div>
         </div>
         <div class="row mb-3">
@@ -127,7 +124,7 @@
             </div>
             <div class="col-md-3">
                 <label asp-for="DiscountAmount" class="form-label">Discount</label>
-                <input asp-for="DiscountAmount" class="form-control discount" readonly/>
+                <input asp-for="DiscountAmount" class="form-control discount"/>
             </div>
             <div class="col-md-3">
                 <label asp-for="TotalAmount" class="form-label">Total (with VAT)</label>
@@ -151,7 +148,7 @@
     <script>
         let index = @Model.StockMovements.Count;
         const productUnitMap = @Html.Raw(productUnitJson);
-        @* const products = @Html.Raw(Json.Serialize(Model.Products)); // fallback for JS add-row *@
+        const products = @Html.Raw(Json.Serialize(Model.Products)); // fallback for JS add-row
 
         function getProductOptions(selectedValue = "") {
             return products.map(p => `<option value="${p.value}" ${p.value === selectedValue ? 'selected' : ''}>${p.text}</option>`).join('');
@@ -161,7 +158,7 @@
             const row = `
                 <tr>
                     <td>
-                        <select name="StockMovements[${index}].ProductId" class="form-select product-select" required readonly>
+                        <select name="StockMovements[${index}].ProductId" class="form-select product-select" required>
                             <option value="">Select</option>
                             ${getProductOptions()}
                         </select>
@@ -173,13 +170,13 @@
                         <input type="number" name="StockMovements[${index}].Quantity" class="form-control quantity" value="0" step="0.01" min="0.1" required />
                     </td>
                     <td>
-                        <input type="number" name="StockMovements[${index}].Rate" class="form-control rate" value="0" step="0.01" min="0" required readonly />
+                        <input type="number" name="StockMovements[${index}].Rate" class="form-control rate" value="0" step="0.01" min="0" required />
                     </td>
                     <td>
                         <input type="text" class="form-control amount" readonly value="0.00" />
                     </td>
                     <td>
-                        <input type="number" name="StockMovements[${index}].VatPercentage" readonly class="form-control vat-percentage" value="13" step="0.01" min="0" required />
+                        <input type="number" name="StockMovements[${index}].VatPercentage" class="form-control vat-percentage" value="13" step="0.01" min="0" required />
                     </td>
                     <td>
                         <input type="text" class="form-control vat-amount" readonly value="0.00" />

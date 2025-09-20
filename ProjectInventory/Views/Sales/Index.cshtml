@@ -15,6 +15,7 @@
             <tr>
                 <th>Invoice Number</th>
                 <th>Date</th>   
+                <th>StakeHolder</th>
                 <th>Total Amount</th>
                 <th>Discount</th>
                 <th>Taxable Amount</th>
@@ -31,6 +32,7 @@
                     <tr>
                         <td>@sale.InvoiceNo</td>
                         <td>@sale.TransactionDate.ToString("yyyy-MM-dd")</td>
+                        <td>@sale.StakeHolder.Name</td>
                         <td>@sale.TotalAmount.ToString("0.00")</td>
                         <td>@sale.DiscountAmount.ToString("0.00")</td>
                         <td>@sale.TaxableAmount.ToString("0.00")</td>
@@ -38,8 +40,7 @@
                         <td>@sale.Description</td>
                         <td>
                             <a asp-action="Edit" asp-route-id="@sale.Id" class="btn btn-sm btn-warning">Edit</a>
-                            <a asp-action="Details" asp-route-id="@sale.Id" class="btn btn-sm btn-info">Details</a>
-                            <a asp-action="Delete" asp-route-id="@sale.Id" class="btn btn-sm btn-danger">Delete</a>
+                            <a asp-action="Return" asp-route-id="@sale.Id" class="btn btn-sm btn-danger">Return</a>
                         </td>
                     </tr>
                 }

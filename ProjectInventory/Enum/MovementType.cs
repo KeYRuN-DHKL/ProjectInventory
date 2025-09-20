@@ -10,5 +10,5 @@ public enum MovementType
     Transfer = 6,
     Damage = 7,
     Opening = 8,
-    SaleReturn = 9,
+    SalesReturn = 9,
 }

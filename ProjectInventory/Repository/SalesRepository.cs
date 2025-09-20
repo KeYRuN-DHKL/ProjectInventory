@@ -16,7 +16,17 @@ public class SalesRepository : ISalesRepository
 
     public async Task<List<Sale>> GetAllAsync()
     {
-        var saleItems = await _context.Sales.ToListAsync();
+        var saleItems = await _context.Sales.
+            Include(s=> s.StakeHolder)
+            .ToListAsync();
         return saleItems;
+    }
+
+    public async Task<Sale> FindById(Guid id)
+    {
+        var saleItem = await _context.Sales.FindAsync(id);
+        if (saleItem == null)
+            throw new KeyNotFoundException("Item not found");
+        return saleItem;
     }
 }

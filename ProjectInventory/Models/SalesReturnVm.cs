@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Mvc.Rendering;
-
 namespace ProjectInventory.Models;
 
-public class PurchaseReturnVm
+public class SalesReturnVm
 {
     public Guid Id { get; set; }
     public string InvoiceNumber { get; set; } = string.Empty;

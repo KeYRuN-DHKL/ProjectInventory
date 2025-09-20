@@ -11,5 +11,5 @@ public class StockMovementReturnVm
     public decimal? VatPercentage { get; set; }
     public Stock? stock { get; set; }
     public string? UnitName { get; set; }
-    public string ProductName { get; set; }
+    public string? ProductName { get; set; }
 }
