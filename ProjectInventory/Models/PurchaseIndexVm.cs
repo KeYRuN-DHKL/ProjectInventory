@@ -1,3 +1,5 @@
+using ProjectInventory.Enum;
+
 namespace ProjectInventory.Models;
 
 public class PurchaseIndexVm
@@ -11,5 +13,6 @@ public class PurchaseIndexVm
     public decimal TaxAmount { get; set; }
     public decimal DiscountAmount { get; set; }
     public string Description { get; set; } = string.Empty;
+    public Status Status { get; set; }
     public decimal GrandTotal => TotalAmount + TaxAmount - DiscountAmount;
 }

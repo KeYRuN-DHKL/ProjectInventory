@@ -1,3 +1,4 @@
+using ProjectInventory.Dto;
 using ProjectInventory.Entities;
 using ProjectInventory.Enum;
 
@@ -7,4 +8,5 @@ public interface IStockMovementRepository
 {
     Task<List<StockMovement>> FindByIdAsync(Guid id);
     Task<List<StockMovement>> FindByInvoiceNumberAsync(string invoiceNumber,MovementType type);
+    Task<List<StockMovementApiDto>> GetItemAsync(Guid id);
 }

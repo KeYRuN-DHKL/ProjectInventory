@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using ProjectInventory.Data;
 using ProjectInventory.Dto;
 using ProjectInventory.Entities;
@@ -84,4 +85,5 @@ public class StockMovementService : IStockMovementService
         _context.StockMovements.Add(stockMovement);
         return await _context.SaveChangesAsync() > 0;
     }
+    
 }

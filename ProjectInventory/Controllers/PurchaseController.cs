@@ -42,6 +42,7 @@ public class PurchaseController : Controller
             TaxableAmount = p.TaxableAmount,
             TaxAmount = p.TaxAmount,
             TotalAmount = p.TotalAmount,
+            Status = p.Status,
             TransactionDate = p.TransactionDate
         }).ToList();
         return View(vm);

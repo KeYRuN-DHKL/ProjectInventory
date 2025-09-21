@@ -1,56 +1,168 @@
-@model List<PurchaseIndexVm>
+@using ProjectInventory.Enum
+@model List<ProjectInventory.Models.PurchaseIndexVm>
 
 @{
-    ViewData["Title"] = "Purchases";
+ViewBag.Title = "Purchase List";
+Layout = "_Layout";
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Purchase List</h2>
-        <a asp-action="Create" class="btn btn-primary">+ New Purchase</a>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-center text-primary">Purchase List</h2>
+        <a class="btn btn-primary" asp-action="Create">+ Add Purchase</a>
     </div>
 
-    <table class="table table-striped table-bordered">
-        <thead class="table-dark">
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered" id="openingTable">
+            <thead class="table-light sticky-top">
             <tr>
-                <th>Invoice Number</th>
-                <th>Supplier</th>
-                <th>Transaction Date</th>
+                <th style="width: 40px;"></th>
+                <th>Date</th>
+                <th>Invoice No.</th>
+                <th>Vendor</th>
+                <th>Amount</th>
+                <th>Taxable Amount</th>
+                <th>Tax Amount</th>
                 <th>Total Amount</th>
-                <th>Discount</th>
-                <th>Tax</th>
-                <th>Grand Total</th>
                 <th>Description</th>
-                <th>Actions</th>
+                <th>Action</th>
             </tr>
-        </thead>
-        <tbody>
-            @if (Model.Any())
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
             {
-                foreach (var purchase in Model)
+            <tr data-invoice="@item.Id">
+                @if (item.Status == Status.Completed)
                 {
-                    <tr>
-                        <td>@purchase.InvoiceNumber</td>
-                        <td>@purchase.StakeHolderName</td>
-                        <td>@purchase.TransactionDate.ToString("yyyy-MM-dd")</td>
-                        <td>@purchase.TotalAmount.ToString("0.00")</td>
-                        <td>@purchase.DiscountAmount.ToString("0.00")</td>
-                        <td>@purchase.TaxAmount.ToString("0.00")</td>
-                        <td>@(purchase.TotalAmount + purchase.TaxAmount - purchase.DiscountAmount)</td>
-                        <td>@purchase.Description</td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@purchase.Id" class="btn btn-sm btn-warning">Edit</a>
-                            <a class="btn btn-secondary" asp-action="Return" asp-route-id="@purchase.Id">Return</a>
-                        </td>
-                    </tr>
+                <td class="text-center" style="cursor:pointer;" onclick="toggleDetails(this, '@item.Id','Purchase')">+</td>
                 }
+                else
+                {
+                <td class="text-center" style="cursor:pointer;" onclick="toggleDetails(this, '@item.Id','PurchaseReturn')">+</td>
+                }
+
+                <td>@item.TransactionDate</td>
+                <td>@item.InvoiceNumber</td>
+                <td>@item.StakeHolderName</td>
+                <td>@item.TotalAmount</td>
+                <td>@item.TaxableAmount</td>
+                <td>@item.TaxAmount</td>
+                <td>@item.GrandTotal</td>
+                <td>@item.Description</td>
+                @if (item.Status == Status.Returned)
+                {
+                <td class="text-danger">Returned</td>
+                }
+                else
+                {
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="me-2">Edit</a>
+                    <a asp-action="Return" asp-route-id="@item.Id">Return</a>
+                </td>
+                }
+            </tr>
             }
-            else
-            {
-                <tr>
-                    <td colspan="9" class="text-center">No purchases found.</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<!-- Bootstrap Modal for Delete Confirmation -->
+<div class="modal fade" id="popup" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" id="popupContent">
+            <!-- Content from ConfirmDelete will be injected here -->
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDetails(element, Id, Type) {
+        const row = element.closest('tr');
+        const isExpanded = element.textContent === "-";
+
+        if (isExpanded) {
+            const nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('details-row')) nextRow.remove();
+            element.textContent = "+";
+        } else {
+            const nextRow = row.nextElementSibling;
+            if (nextRow && nextRow.classList.contains('details-row')) nextRow.remove();
+
+            fetch(`/api/Api/${Id}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Not found");
+                    return res.json();
+                })
+                .then(data => {
+                    let totalAmount = 0;
+                    const rowsHtml = data.map(item => {
+                        const total = (item.quantity * item.rate) + (item.quantity * item.rate * item.vatPercentage / 100);
+                        totalAmount += total;
+                        return `
+                        <tr>
+                            <td>${item.productName || 'N/A'}</td>
+                            <td>${item.unit || ''}</td>
+                            <td>${item.quantity}</td>
+                            <td>${item.rate}</td>
+                            <td>${item.amount}</td>
+                            <td>${item.vatPercentage}</td>
+                            <td>${item.amount * item.vatPercentage/100}</td>
+                            <td>${item.amount + (item.amount * item.vatPercentage/100)}</td>
+                        </tr>
+                    `;
+                    }).join('');
+
+                    const detailRow = document.createElement("tr");
+                    detailRow.className = "details-row";
+                    detailRow.innerHTML = `
+                    <td colspan="10" class="p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Unit</th>
+                                        <th>Quantity</th>
+                                        <th>Rate</th>
+                                        <th>Amount</th>
+                                        <th>Vat (%)</th>
+                                        <th>Vat Amount</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rowsHtml}
+                                    <tr class="fw-bold">
+                                        <td colspan="7" class="text-end">Total Amount</td>
+                                        <td>${totalAmount.toFixed(2)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                `;
+                    row.parentNode.insertBefore(detailRow, row.nextSibling);
+                    element.textContent = "-";
+                })
+                .catch(err => {
+                    alert("Failed to load purchase items.");
+                    console.error(err);
+                });
+        }
+    }
+
+    function openDeletePopup(id) {
+        fetch(`/Purchase/ConfirmDelete/?id=${id}`)
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to load Delete popup');
+                return res.text();
+            })
+            .then(html => {
+                document.getElementById('popupContent').innerHTML = html;
+                const modal = new bootstrap.Modal(document.getElementById('popup'));
+                modal.show();
+            })
+            .catch(err => console.error(err));
+    }
+</script>
