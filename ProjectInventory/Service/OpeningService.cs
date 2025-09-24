@@ -5,15 +5,8 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Service;
 
-public class OpeningService : IOpeningService
+public class OpeningService(ApplicationDbContext context) : IOpeningService
 {
-    private readonly ApplicationDbContext _context;
-
-    public OpeningService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<Opening> AddAsync(OpeningDto dto)
     {
         var opening = new Opening
@@ -24,8 +17,8 @@ public class OpeningService : IOpeningService
             CreatedAt = DateTime.UtcNow,
             Description = dto.Description
         };
-        _context.Openings.Add(opening);
-        await _context.SaveChangesAsync();
+        context.Openings.Add(opening);
+        await context.SaveChangesAsync();
         return opening;
     }
 }

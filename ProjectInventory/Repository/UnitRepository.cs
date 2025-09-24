@@ -6,30 +6,23 @@ using ProjectInventory.Repository.Interface;
 
 namespace ProjectInventory.Repository;
 
-public class UnitRepository : IUnitRepository
+public class UnitRepository(ApplicationDbContext context) : IUnitRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public UnitRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<List<Unit>> GetAllAsync()
     {
-        var units = await _context.Units.ToListAsync();
+        var units = await context.Units.ToListAsync();
         return units;
     }
 
     public async Task<Unit?> GetByIdAsync(Guid id)
     {
-        var units = await _context.Units.FindAsync(id);
+        var units = await context.Units.FindAsync(id);
         return units;
     }
 
     public async Task<List<SelectListItem>> GetAllSelectListAsync()
     {
-        return await _context.Units
+        return await context.Units
             .Where(c => c.IsActive)
             .Select(c => new SelectListItem
             {

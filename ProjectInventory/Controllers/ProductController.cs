@@ -7,30 +7,17 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Controllers;
 
-public class ProductController : Controller
+public class ProductController(
+    IProductRepository repository,
+    IProductService service,
+    ICategoryRepository categoryRepository,
+    IUnitRepository unitRepository,
+    IToastNotification toastNotification)
+    : Controller
 {
-    private readonly IProductRepository _repository;
-    private readonly IProductService _service;
-    private readonly ICategoryRepository _categoryRepository;
-    private readonly IUnitRepository _unitRepository;
-    private readonly IToastNotification _toastNotification;
-
-    public ProductController(IProductRepository repository, 
-        IProductService service,
-        ICategoryRepository categoryRepository,
-        IUnitRepository unitRepository,
-        IToastNotification toastNotification)
-    {
-        _repository = repository;
-        _service = service;
-        _categoryRepository = categoryRepository;
-        _unitRepository = unitRepository;
-        _toastNotification = toastNotification;
-    }
-
     public async Task<IActionResult> Index()
     {
-        var items = await _repository.GetAllAsync();
+        var items = await repository.GetAllAsync();
         return View(items);
     }
 
@@ -38,8 +25,8 @@ public class ProductController : Controller
     {
         var vm = new ProductVm
         {
-            Categories = await _categoryRepository.GetAllSelectListAsync(),
-            Units=await _unitRepository.GetAllSelectListAsync()
+            Categories = await categoryRepository.GetAllSelectListAsync(),
+            Units=await unitRepository.GetAllSelectListAsync()
         };
         return View(vm);
     }
@@ -50,8 +37,8 @@ public class ProductController : Controller
     {
         if (!ModelState.IsValid)
         {
-            vm.Units = await _unitRepository.GetAllSelectListAsync();
-            vm.Categories = await _categoryRepository.GetAllSelectListAsync();
+            vm.Units = await unitRepository.GetAllSelectListAsync();
+            vm.Categories = await categoryRepository.GetAllSelectListAsync();
             return View(vm);
         }
 
@@ -68,11 +55,11 @@ public class ProductController : Controller
                 CategoryId = vm.CategoryId,
                 IsActive = vm.IsActive
             };
-            var isSaved = await _service.AddAsync(items);
+            var isSaved = await service.AddAsync(items);
             if (isSaved)
-                _toastNotification.AddSuccessToastMessage("Items Added Successfully");
+                toastNotification.AddSuccessToastMessage("Items Added Successfully");
             else
-                _toastNotification.AddErrorToastMessage("Unable to Add Items");
+                toastNotification.AddErrorToastMessage("Unable to Add Items");
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
@@ -83,7 +70,7 @@ public class ProductController : Controller
     }
     public async Task<IActionResult> Edit(Guid id)
     {
-        var items = await _repository.GetByIdAsync(id);
+        var items = await repository.GetByIdAsync(id);
         if (items == null)
             return NotFound();
         var viewModel = new ProductEditVm
@@ -92,8 +79,8 @@ public class ProductController : Controller
             Code = items.Code,
             CostPrice = items.CostPrice,
             Description = items.Description,
-            Units = await _unitRepository.GetAllSelectListAsync(),
-            Categories = await _categoryRepository.GetAllSelectListAsync(),
+            Units = await unitRepository.GetAllSelectListAsync(),
+            Categories = await categoryRepository.GetAllSelectListAsync(),
             IsActive = items.IsActive
         };
         return View(viewModel);
@@ -103,8 +90,8 @@ public class ProductController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(Guid id, ProductEditVm vm)
     {
-        vm.Units = await _unitRepository.GetAllSelectListAsync();
-        vm.Categories = await _categoryRepository.GetAllSelectListAsync();
+        vm.Units = await unitRepository.GetAllSelectListAsync();
+        vm.Categories = await categoryRepository.GetAllSelectListAsync();
         if (!ModelState.IsValid)
         {
             return View(vm);
@@ -122,13 +109,13 @@ public class ProductController : Controller
                 CategoryId = vm.CategoryId,
                 IsActive = vm.IsActive,
             };
-            var isUpdated = await _service.UpdateAsync(id, productDto);
+            var isUpdated = await service.UpdateAsync(id, productDto);
             if (isUpdated)
             {
-                _toastNotification.AddSuccessToastMessage("Item updated successfully");
+                toastNotification.AddSuccessToastMessage("Item updated successfully");
                 return RedirectToAction(nameof(Index));
             }
-            _toastNotification.AddErrorToastMessage("Failed to update an item...");
+            toastNotification.AddErrorToastMessage("Failed to update an item...");
             return View(vm);
         }
         catch (Exception ex)
@@ -139,7 +126,7 @@ public class ProductController : Controller
     }
     public async Task<IActionResult> Remove(Guid id)
     {
-        var items = await _repository.GetByIdAsync(id);
+        var items = await repository.GetByIdAsync(id);
        if (items == null)
        {
            return NotFound();
@@ -160,11 +147,11 @@ public class ProductController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveConfirmed(Guid id)
     {
-            var isDeleted = await _service.DeleteAsync(id);
+            var isDeleted = await service.DeleteAsync(id);
             if (isDeleted)
-                _toastNotification.AddSuccessToastMessage("The item has been deleted successfully");
+                toastNotification.AddSuccessToastMessage("The item has been deleted successfully");
             else
-                _toastNotification.AddErrorToastMessage("Failed to delete an item");
+                toastNotification.AddErrorToastMessage("Failed to delete an item");
             return RedirectToAction(nameof(Index));
     }
 }

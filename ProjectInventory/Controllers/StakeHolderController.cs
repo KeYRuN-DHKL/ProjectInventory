@@ -7,24 +7,15 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Controllers;
 
-public class StakeHolderController : Controller
+public class StakeHolderController(
+    IStakeHolderRepository repository,
+    IStakeHolderService service,
+    IToastNotification toastNotification)
+    : Controller
 {
-    private readonly IStakeHolderRepository _repository;
-    private readonly IStakeHolderService _service;
-    private readonly IToastNotification _toastNotification;
-
-    public StakeHolderController(IStakeHolderRepository repository,
-        IStakeHolderService service,
-        IToastNotification toastNotification)
-    {
-        _repository = repository;
-        _service = service;
-        _toastNotification = toastNotification;
-    }
-
     public async Task<IActionResult> Index()
     {
-            var items = await _repository.GetAllAsync();
+            var items = await repository.GetAllAsync();
             return View(items);
     }
 
@@ -55,11 +46,11 @@ public class StakeHolderController : Controller
                 VatNo = vm.VatNo,
                 IsActive = vm.IsActive
             };
-            bool isCreated = await _service.AddAsync(items);
+            bool isCreated = await service.AddAsync(items);
             if (isCreated)
-                _toastNotification.AddSuccessToastMessage("StakeHolder Added Successfully");
+                toastNotification.AddSuccessToastMessage("StakeHolder Added Successfully");
             else
-                _toastNotification.AddErrorToastMessage("Unable to add StakeHolder");
+                toastNotification.AddErrorToastMessage("Unable to add StakeHolder");
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
@@ -71,7 +62,7 @@ public class StakeHolderController : Controller
 
     public async Task<IActionResult> Edit(Guid id)
     {
-        var item = await _repository.GetByIdAsync(id);
+        var item = await repository.GetByIdAsync(id);
         if (item == null)
         {
             return NotFound();
@@ -111,11 +102,11 @@ public class StakeHolderController : Controller
                 VatNo = vm.VatNo,
                 IsActive = vm.IsActive
             };
-            var isUpdated = await _service.UpdateAsync(id, items);
+            var isUpdated = await service.UpdateAsync(id, items);
             if (isUpdated)
-                _toastNotification.AddSuccessToastMessage("Stakeholder Updated Successfully");
+                toastNotification.AddSuccessToastMessage("Stakeholder Updated Successfully");
             else
-                _toastNotification.AddErrorToastMessage("Unable to update an stakeholder");
+                toastNotification.AddErrorToastMessage("Unable to update an stakeholder");
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
@@ -127,7 +118,7 @@ public class StakeHolderController : Controller
 
     public async Task<IActionResult> Remove(Guid id)
     {
-        var item = await _repository.GetByIdAsync(id);
+        var item = await repository.GetByIdAsync(id);
         if (item == null)
             return NotFound();
         var stakeHolder = new StakeHolderDeleteVm
@@ -147,11 +138,11 @@ public class StakeHolderController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveConfirmed(Guid id)
     {
-        var isDeleted = await _service.DeleteAsync(id);
+        var isDeleted = await service.DeleteAsync(id);
         if (!isDeleted)
-            _toastNotification.AddSuccessToastMessage("StakeHolder Deleted Successfully");
+            toastNotification.AddSuccessToastMessage("StakeHolder Deleted Successfully");
         else
-            _toastNotification.AddErrorToastMessage("Unable to delete an stakeholder");
+            toastNotification.AddErrorToastMessage("Unable to delete an stakeholder");
         return RedirectToAction(nameof(Index));
     }
     

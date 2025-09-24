@@ -6,20 +6,11 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Controllers;
 
-public class UnitController : Controller
+public class UnitController(IUnitRepository repository, IUnitService service) : Controller
 {
-    private readonly IUnitRepository _repository;
-    private readonly IUnitService _service;
-
-    public UnitController(IUnitRepository repository, IUnitService service)
-    {
-        _repository = repository;
-        _service = service;
-    }
-
     public async Task<IActionResult> Index()
     {
-        var items =await  _repository.GetAllAsync();
+        var items =await  repository.GetAllAsync();
         return View(items);
     }
 
@@ -41,13 +32,13 @@ public class UnitController : Controller
             Symbol = vm.Symbol,
             Description = vm.Description,
         };
-        await _service.AddAsync(units);
+        await service.AddAsync(units);
         return RedirectToAction(nameof(Index));
     }
 
     public async Task<IActionResult> Edit(Guid id)
     {
-        var units = await _repository.GetByIdAsync(id);
+        var units = await repository.GetByIdAsync(id);
         if (units == null)
             return NotFound();
         
@@ -78,7 +69,7 @@ public class UnitController : Controller
                 IsActive = vm.IsActive
             };
 
-            await _service.UpdateAsync(id, items);
+            await service.UpdateAsync(id, items);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
@@ -95,7 +86,7 @@ public class UnitController : Controller
     {
         try
         {
-            await _service.DeleteAsync(id);
+            await service.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception e)

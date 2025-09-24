@@ -7,25 +7,20 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Controllers;
 
-public class DamageController:Controller
+public class DamageController(
+    IDamageService damageService,
+    IProductRepository productRepository,
+    IStockMovementService stockMovementService)
+    : Controller
 {
-    private readonly IDamageService _damageService;
-    private readonly IProductRepository _productRepository;
-    private readonly IStockMovementService _stockMovementService;
-
-    public DamageController(IDamageService damageService, IProductRepository productRepository, IStockMovementService stockMovementService)
-    {
-        _damageService = damageService;
-        _productRepository = productRepository;
-        _stockMovementService = stockMovementService;
-    }
-
     public async Task<IActionResult> Create()
     {
-        DamageVm vm = new DamageVm();
-        vm.Products = await _productRepository.GetAllSelectListAsync();
-        vm.Date = DateOnly.FromDateTime(DateTime.Now);
-        var products = await _productRepository.GetAllAsync();
+        DamageVm vm = new DamageVm
+        {
+            Products = await productRepository.GetAllSelectListAsync(),
+            Date = DateOnly.FromDateTime(DateTime.Now)
+        };
+        var products = await productRepository.GetAllAsync();
         vm.ProductUnitMap = products.ToDictionary(
             p => p.Id.ToString(),
             p => p.Unit.Symbol
@@ -41,9 +36,9 @@ public class DamageController:Controller
         {
             if (!ModelState.IsValid)
             {
-                vm.Products = await _productRepository.GetAllSelectListAsync();
+                vm.Products = await productRepository.GetAllSelectListAsync();
                 vm.Date = DateOnly.FromDateTime(DateTime.Now);
-                var products = await _productRepository.GetAllAsync();
+                var products = await productRepository.GetAllAsync();
                 vm.ProductUnitMap = products.ToDictionary(
                     p => p.Id.ToString(),
                     p => p.Unit.Symbol
@@ -59,7 +54,7 @@ public class DamageController:Controller
                 Description = vm.Description
             };
 
-            var damage = await _damageService.AddAsync(dto);
+            var damage = await damageService.AddAsync(dto);
             var stockMovementsDto = vm.StockMovements.Select(sm => new StockMovementDto
             {
 
@@ -71,15 +66,15 @@ public class DamageController:Controller
                 TypeId = damage.Id,
                 Stock = Stock.Out,
             }).ToList();
-            await _stockMovementService.AddAsync(stockMovementsDto);
+            await stockMovementService.AddAsync(stockMovementsDto);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", $"An unexpected error occured {ex.Message}");
-            vm.Products = await _productRepository.GetAllSelectListAsync();
+            vm.Products = await productRepository.GetAllSelectListAsync();
             vm.Date = DateOnly.FromDateTime(DateTime.Now);
-            var products = await _productRepository.GetAllAsync();
+            var products = await productRepository.GetAllAsync();
             vm.ProductUnitMap = products.ToDictionary(
                 p => p.Id.ToString(),
                 p => p.Unit.Symbol

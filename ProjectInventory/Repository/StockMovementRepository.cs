@@ -7,18 +7,11 @@ using ProjectInventory.Repository.Interface;
 
 namespace ProjectInventory.Repository;
 
-public class StockMovementRepository : IStockMovementRepository
+public class StockMovementRepository(ApplicationDbContext context) : IStockMovementRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public StockMovementRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<List<StockMovement>> FindByIdAsync(Guid id)
     {
-        return await _context.StockMovements
+        return await context.StockMovements
             .Where(s => s.TypeId == id)
             .Include(s => s.Product)
             .ThenInclude(s => s.Unit)
@@ -27,14 +20,14 @@ public class StockMovementRepository : IStockMovementRepository
 
     public async Task<List<StockMovement>> FindByInvoiceNumberAsync(string invoiceNumber, MovementType type)
     {
-        return await _context.StockMovements
+        return await context.StockMovements
             .Where(s => s.InvoiceNumber == invoiceNumber && s.MovementType == type)
             .ToListAsync();
     }
     
     public async Task<List<StockMovementApiDto>> GetItemAsync(Guid id)
     {
-        return await _context.StockMovements
+        return await context.StockMovements
             .Where(sm => sm.TypeId == id)
             .Include(sm => sm.Product) 
             .ThenInclude(p => p.Unit)  

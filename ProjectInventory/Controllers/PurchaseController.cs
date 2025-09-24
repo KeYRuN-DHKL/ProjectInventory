@@ -52,10 +52,12 @@ public class PurchaseController : Controller
     {
         try
         {
-            var vm = new PurchaseVm();
-            vm.Products = await _productRepository.GetAllSelectListAsync();
-            vm.StakeHolders = await _stakeholderRepository.GetAllSelectListAsync();
-            vm.TransactionDate = DateOnly.FromDateTime(DateTime.Now);
+            var vm = new PurchaseVm
+            {
+                Products = await _productRepository.GetAllSelectListAsync(),
+                StakeHolders = await _stakeholderRepository.GetAllSelectListAsync(),
+                TransactionDate = DateOnly.FromDateTime(DateTime.Now)
+            };
             var products = await _productRepository.GetAllAsync();
             vm.ProductUnitMap = products.ToDictionary(
                 p => p.Id.ToString(),

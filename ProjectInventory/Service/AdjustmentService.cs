@@ -6,18 +6,11 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Service;
 
-public class AdjustmentService : IAdjustmentService
+public class AdjustmentService(ApplicationDbContext context) : IAdjustmentService
 {
-    private readonly ApplicationDbContext _context;
-
-    public AdjustmentService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<string> GetInvoiceNumber()
     {
-        var lastInvoiceNo = await _context.Adjustments.OrderByDescending(k => k.InvoiceNo).FirstOrDefaultAsync();
+        var lastInvoiceNo = await context.Adjustments.OrderByDescending(k => k.InvoiceNo).FirstOrDefaultAsync();
         long newInvoiceNo = 1;
         if (lastInvoiceNo != null)
         {
@@ -35,8 +28,8 @@ public class AdjustmentService : IAdjustmentService
         adjustment.Date = dto.Date;
         adjustment.Amount = dto.Amount;
         adjustment.Description = dto.Description;
-        _context.Adjustments.Add(adjustment);
-        await _context.SaveChangesAsync();
+        context.Adjustments.Add(adjustment);
+        await context.SaveChangesAsync();
         return adjustment;
     }
 }

@@ -5,15 +5,8 @@ namespace ProjectInventory.Controllers;
 
 [ApiController]
 [Route("api/[Controller]")]
-public class ApiController:ControllerBase
+public class ApiController(IStockMovementRepository repository) : ControllerBase
 {
-    private readonly IStockMovementRepository _repository;
-
-    public ApiController(IStockMovementRepository repository)
-    {
-        _repository = repository;
-    }
-
     [HttpGet("{id}")]
     public async  Task<IActionResult> GetItem(Guid id)
 
@@ -25,7 +18,7 @@ public class ApiController:ControllerBase
                 return BadRequest(new { message = "Id is required..." });
             }
 
-            var items = await _repository.GetItemAsync(id);
+            var items = await repository.GetItemAsync(id);
             if (items.Count == 0)
             {
                 return NotFound("Items not found...");

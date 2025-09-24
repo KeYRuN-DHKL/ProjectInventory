@@ -8,28 +8,21 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Controllers;
 
-public class AdjustmentController : Controller
+public class AdjustmentController(
+    IAdjustmentService adjustmentService,
+    IProductRepository productRepository,
+    IStockMovementService stockmovementService)
+    : Controller
 {
-    private readonly IAdjustmentService _adjustmentService;
-    private readonly IProductRepository _productRepository;
-    private readonly IStockMovementService _stockMovementService;
-
-    public AdjustmentController(IAdjustmentService adjustmentService, IProductRepository productRepository, IStockMovementService stockmovementService)
-    {
-        _adjustmentService = adjustmentService;
-        _productRepository = productRepository;
-        _stockMovementService = stockmovementService;
-    }
-    
     public async Task<IActionResult> Create()
     {
         try
         {
             var vm = new AdjustmentVm();
-            vm.Products = await _productRepository.GetAllSelectListAsync();
+            vm.Products = await productRepository.GetAllSelectListAsync();
             vm.Date = DateOnly.FromDateTime(DateTime.Now);
-            vm.InvoiceNo = await _adjustmentService.GetInvoiceNumber();
-            var products = await _productRepository.GetAllAsync();
+            vm.InvoiceNo = await adjustmentService.GetInvoiceNumber();
+            var products = await productRepository.GetAllAsync();
             vm.ProductUnitMap = products.ToDictionary(
                 p => p.Id.ToString(),
                 p => p.Unit.Symbol
@@ -51,10 +44,10 @@ public class AdjustmentController : Controller
         {
             if (!ModelState.IsValid)
             {
-                vm.Products = await _productRepository.GetAllSelectListAsync();
+                vm.Products = await productRepository.GetAllSelectListAsync();
                 vm.Date = DateOnly.FromDateTime(DateTime.Now);
-                vm.InvoiceNo = await _adjustmentService.GetInvoiceNumber();
-                var products = await _productRepository.GetAllAsync();
+                vm.InvoiceNo = await adjustmentService.GetInvoiceNumber();
+                var products = await productRepository.GetAllAsync();
                 vm.ProductUnitMap = products.ToDictionary(
                     p => p.Id.ToString(),
                     p => p.Unit.Symbol
@@ -70,7 +63,7 @@ public class AdjustmentController : Controller
                 Description = vm.Description
             };
 
-            var adjustment = await _adjustmentService.AddAsync(dto);
+            var adjustment = await adjustmentService.AddAsync(dto);
             var stockMovementsDto = vm.StockMovements.Select(sm => new StockMovementDto
             {
 
@@ -83,16 +76,16 @@ public class AdjustmentController : Controller
                 TypeId = adjustment.Id,
                 Stock = sm.Stock,
             }).ToList();
-            await _stockMovementService.AddAsync(stockMovementsDto);
+            await stockmovementService.AddAsync(stockMovementsDto);
             return RedirectToAction("Index");
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", $"An unexpected error occured {ex.Message}");
-            vm.Products = await _productRepository.GetAllSelectListAsync();
+            vm.Products = await productRepository.GetAllSelectListAsync();
             vm.Date = DateOnly.FromDateTime(DateTime.Now);
-            vm.InvoiceNo = await _adjustmentService.GetInvoiceNumber();
-            var products = await _productRepository.GetAllAsync();
+            vm.InvoiceNo = await adjustmentService.GetInvoiceNumber();
+            var products = await productRepository.GetAllAsync();
             vm.ProductUnitMap = products.ToDictionary(
                 p => p.Id.ToString(),
                 p => p.Unit.Symbol

@@ -6,18 +6,11 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Service;
 
-public class StakeHolderService:IStakeHolderService
+public class StakeHolderService(ApplicationDbContext context) : IStakeHolderService
 {
-    private readonly ApplicationDbContext _context;
-
-    public StakeHolderService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<bool> AddAsync(StakeHolderDto dto)
     {
-        var isExisted = await _context.StakeHolders.AnyAsync(c =>
+        var isExisted = await context.StakeHolders.AnyAsync(c =>
             c.VatNo == dto.VatNo && c.PhoneNumber == dto.PhoneNumber && c.Email == dto.Email);
         if (isExisted)
             throw new InvalidOperationException("Person Already Exists");
@@ -34,13 +27,13 @@ public class StakeHolderService:IStakeHolderService
             IsActive = dto.IsActive,
             CreatedAt = DateTime.UtcNow
         };
-        _context.StakeHolders.Add(items);
-        return await _context.SaveChangesAsync() > 0;
+        context.StakeHolders.Add(items);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> UpdateAsync(Guid id,StakeHolderDto dto)
     {
-        var items = await _context.StakeHolders.FindAsync(id);
+        var items = await context.StakeHolders.FindAsync(id);
         
         if (items == null)
             throw new Exception($"Item with the Id : {id} not available...");
@@ -54,16 +47,16 @@ public class StakeHolderService:IStakeHolderService
         items.IsActive = dto.IsActive;
         items.UpdatedAt = DateTime.UtcNow;
 
-        _context.StakeHolders.Update(items);
-        return await _context.SaveChangesAsync() > 0;
+        context.StakeHolders.Update(items);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var item = await _context.StakeHolders.FindAsync(id);
+        var item = await context.StakeHolders.FindAsync(id);
         if (item == null)
             throw new InvalidOperationException($"Item with the Id: {id} not found");
-        _context.StakeHolders.Remove(item);
-        return await _context.SaveChangesAsync() > 0;
+        context.StakeHolders.Remove(item);
+        return await context.SaveChangesAsync() > 0;
     }
 }

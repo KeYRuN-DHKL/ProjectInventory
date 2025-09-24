@@ -6,18 +6,11 @@ using ProjectInventory.Repository.Interface;
 
 namespace ProjectInventory.Repository;
 
-public class ProductRepository : IProductRepository
+public class ProductRepository(ApplicationDbContext context) : IProductRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public ProductRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-    
     public async Task<List<Product>> GetAllAsync()
     {
-        var items =await _context.Products
+        var items =await context.Products
             .Include(p => p.Category)
             .Include(p => p.Unit).ToListAsync();
         return items;
@@ -25,13 +18,13 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product?> GetByIdAsync(Guid id)
     {
-        var item = await _context.Products.FindAsync(id);
+        var item = await context.Products.FindAsync(id);
         return item;
     }
 
     public async Task<List<SelectListItem>> GetAllSelectListAsync()
     {
-        return await _context.Products
+        return await context.Products
             .Where(p => p.IsActive)
             .Select(p => new SelectListItem
             {
@@ -39,5 +32,5 @@ public class ProductRepository : IProductRepository
                 Text = p.Name
             }).ToListAsync();
     }
-
+    
 }

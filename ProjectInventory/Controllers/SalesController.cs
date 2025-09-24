@@ -8,31 +8,19 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Controllers;
 
-public class SalesController : Controller
+public class SalesController(
+    IProductRepository productRepository,
+    IStakeHolderRepository stakeholderRepository,
+    ISalesService salesService,
+    IStockMovementService stockMovementService,
+    ISalesRepository salesRepository,
+    IStockMovementRepository stockMovementRepository,
+    IToastNotification toastNotification)
+    : Controller
 {
-    private readonly IProductRepository _productRepository;
-    private readonly IStakeHolderRepository _stakeHolderRepository;
-    private readonly ISalesService _salesService;
-    private readonly IStockMovementService _stockMovementService;
-    private readonly ISalesRepository _salesRepository;
-    private readonly IStockMovementRepository _stockMovementRepository;
-    private readonly IToastNotification _toastNotification;
-
-    public SalesController(IProductRepository productRepository, IStakeHolderRepository stakeholderRepository,
-        ISalesService salesService, IStockMovementService stockMovementService, ISalesRepository salesRepository, IStockMovementRepository stockMovementRepository, IToastNotification toastNotification)
-    {
-        _productRepository = productRepository;
-        _stakeHolderRepository = stakeholderRepository;
-        _salesService = salesService;
-        _stockMovementService = stockMovementService;
-        _salesRepository = salesRepository;
-        _stockMovementRepository = stockMovementRepository;
-        _toastNotification = toastNotification;
-    }
-
     public async Task<IActionResult> Index()
     {
-        var items = await _salesRepository.GetAllAsync();
+        var items = await salesRepository.GetAllAsync();
         return View(items);
     }
 
@@ -41,10 +29,10 @@ public class SalesController : Controller
         try
         {
             var vm = new SalesVm();
-            vm.Products = await _productRepository.GetAllSelectListAsync();
-            vm.StakeHolders = await _stakeHolderRepository.GetAllSelectListAsync();
+            vm.Products = await productRepository.GetAllSelectListAsync();
+            vm.StakeHolders = await stakeholderRepository.GetAllSelectListAsync();
             vm.TransactionDate = DateOnly.FromDateTime(DateTime.Now);
-            var product = await _productRepository.GetAllAsync();
+            var product = await productRepository.GetAllAsync();
             vm.ProductUnitMap = product.ToDictionary(
                 p => p.Id.ToString(),
                 p => p.Unit.Symbol
@@ -64,10 +52,10 @@ public class SalesController : Controller
     {
         if (!ModelState.IsValid)
         {
-            vm.Products = await _productRepository.GetAllSelectListAsync();
-            vm.StakeHolders = await _stakeHolderRepository.GetAllSelectListAsync();
+            vm.Products = await productRepository.GetAllSelectListAsync();
+            vm.StakeHolders = await stakeholderRepository.GetAllSelectListAsync();
             var transactionDate = DateOnly.FromDateTime(DateTime.Now);
-            var product = await _productRepository.GetAllAsync();
+            var product = await productRepository.GetAllAsync();
             vm.ProductUnitMap = product.ToDictionary(
                 p => p.Id.ToString(),
                 p => p.Unit.Symbol
@@ -88,7 +76,7 @@ public class SalesController : Controller
                 TaxableAmount = vm.TaxableAmount,
                 TaxAmount = vm.TaxAmount
             };
-            var sales = await _salesService.CreateAsync(salesDto);
+            var sales = await salesService.CreateAsync(salesDto);
             var stockMovementsDto = vm.StockMovements.Select(sm => new StockMovementDto
             {
                 ProductId = sm.ProductId,
@@ -101,16 +89,16 @@ public class SalesController : Controller
                 TypeId = sales.Id,
                 Stock = Stock.Out,
             }).ToList();
-            await _stockMovementService.AddAsync(stockMovementsDto);
+            await stockMovementService.AddAsync(stockMovementsDto);
             return RedirectToAction("Index");
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", $"An unexpected error occured: {ex.Message}");
-            vm.Products = await _productRepository.GetAllSelectListAsync();
-            vm.StakeHolders = await _stakeHolderRepository.GetAllSelectListAsync();
+            vm.Products = await productRepository.GetAllSelectListAsync();
+            vm.StakeHolders = await stakeholderRepository.GetAllSelectListAsync();
             var transactionDate = DateOnly.FromDateTime(DateTime.Now);
-            var product = await _productRepository.GetAllAsync();
+            var product = await productRepository.GetAllAsync();
             vm.ProductUnitMap = product.ToDictionary(
                 p => p.Id.ToString(),
                 p => p.Unit.Symbol
@@ -123,10 +111,10 @@ public class SalesController : Controller
     {
         try
         {
-            var sales = await _salesRepository.FindById(id);
-            var salesItems = await _stockMovementRepository.FindByIdAsync(id);
-            var stakeHolders = await _stakeHolderRepository.GetAllSelectListAsync();
-            var products = await _productRepository.GetAllSelectListAsync();
+            var sales = await salesRepository.FindById(id);
+            var salesItems = await stockMovementRepository.FindByIdAsync(id);
+            var stakeHolders = await stakeholderRepository.GetAllSelectListAsync();
+            var products = await productRepository.GetAllSelectListAsync();
             var vm = new SalesEditVm
             {
                 Id = sales.Id,
@@ -152,7 +140,7 @@ public class SalesController : Controller
                 Products = products,
                 StakeHolders = stakeHolders,
             };
-            var allProducts = await _productRepository.GetAllAsync();
+            var allProducts = await productRepository.GetAllAsync();
             vm.ProductUnitMap = allProducts.ToDictionary(
                 p => p.Id.ToString(),
                 p => p.Unit.Symbol
@@ -161,7 +149,7 @@ public class SalesController : Controller
         }
         catch (Exception ex)
         {
-            _toastNotification.AddErrorToastMessage("An unexpected error occured..." + ex.Message);
+            toastNotification.AddErrorToastMessage("An unexpected error occured..." + ex.Message);
             return RedirectToAction("Index");
         }
     }
@@ -174,10 +162,10 @@ public class SalesController : Controller
         {
             if (!ModelState.IsValid)
             {
-                vm.Products = await _productRepository.GetAllSelectListAsync();
-                vm.StakeHolders = await _stakeHolderRepository.GetAllSelectListAsync();
+                vm.Products = await productRepository.GetAllSelectListAsync();
+                vm.StakeHolders = await stakeholderRepository.GetAllSelectListAsync();
                 vm.TransactionDate = DateOnly.FromDateTime(DateTime.Now);
-                var products = await _productRepository.GetAllAsync();
+                var products = await productRepository.GetAllAsync();
                 vm.ProductUnitMap = products.ToDictionary(
                     p => p.Id.ToString(),
                     p => p.Unit.Symbol
@@ -198,14 +186,14 @@ public class SalesController : Controller
                 TotalAmount = vm.TotalAmount,
             };
 
-            var updatedSales = await _salesService.UpdateAsync(salesDto);
-            var existingStockMovement = await _stockMovementRepository.FindByIdAsync(vm.Id);
+            var updatedSales = await salesService.UpdateAsync(salesDto);
+            var existingStockMovement = await stockMovementRepository.FindByIdAsync(vm.Id);
 
             foreach (var item in existingStockMovement)
             {
                 if (vm.StockMovements.All(x => x.Id != item.Id))
                 {
-                    await _stockMovementService.DeleteAsync(item.Id);
+                    await stockMovementService.DeleteAsync(item.Id);
                 }
 
                 if (vm.StockMovements.All(x => x.Id == item.Id))
@@ -222,7 +210,7 @@ public class SalesController : Controller
                         TypeId = updatedSales.Id,
                         VatPercentage = newStockMovement.VatPercentage,
                     };
-                    await _stockMovementService.UpdateAsync(stockMovementDto);
+                    await stockMovementService.UpdateAsync(stockMovementDto);
                 }
             }
 
@@ -242,7 +230,7 @@ public class SalesController : Controller
                         TypeId = updatedSales.Id,
                         VatPercentage = item.VatPercentage,
                     };
-                    await _stockMovementService.AddAsync(stockMovementDto);
+                    await stockMovementService.AddAsync(stockMovementDto);
                 }
             }
 
@@ -250,7 +238,7 @@ public class SalesController : Controller
         }
         catch (Exception ex)
         {
-            _toastNotification.AddErrorToastMessage(ex.Message);
+            toastNotification.AddErrorToastMessage(ex.Message);
             return RedirectToAction(nameof(Index));
         }
     }
@@ -259,15 +247,15 @@ public class SalesController : Controller
     {
         try
         {
-            var sales= await _salesRepository.FindById(id);
-            var salesItems = await _stockMovementRepository.FindByIdAsync(id);
+            var sales= await salesRepository.FindById(id);
+            var salesItems = await stockMovementRepository.FindByIdAsync(id);
             var vm = new SalesReturnVm
             {
                 Id = sales.Id,
                 InvoiceNumber = sales.InvoiceNo,
                 Description = sales.Description ?? "",
                 DiscountAmount = sales.DiscountAmount,
-                StakeHolderName = await _stakeHolderRepository.GetStakeHolderName(sales.StakeHolderId),
+                StakeHolderName = await stakeholderRepository.GetStakeHolderName(sales.StakeHolderId),
                 StakeHolderId = sales.StakeHolderId,
                 TotalAmount = sales.TotalAmount,
                 TaxableAmount = sales.TaxableAmount,
@@ -285,7 +273,7 @@ public class SalesController : Controller
                     UnitName = sm.Product.Unit.Name,
                 }).ToList(),
             };
-            var allProducts = await _productRepository.GetAllAsync();
+            var allProducts = await productRepository.GetAllAsync();
             vm.ProductUnitMap = allProducts.ToDictionary(
                 p => p.Id.ToString(),
                 p => p.Unit.Symbol
@@ -294,7 +282,7 @@ public class SalesController : Controller
         }
         catch (Exception ex)
         {
-            _toastNotification.AddErrorToastMessage("An unexpected error occured..." + ex.Message);
+            toastNotification.AddErrorToastMessage("An unexpected error occured..." + ex.Message);
             return RedirectToAction("Index");
         }
     }
@@ -307,15 +295,15 @@ public class SalesController : Controller
             {
                 if (!ModelState.IsValid)
                 {
-                    var salesData = await _salesRepository.FindById(viewModel.Id);
-                    var salesItems = await _stockMovementRepository.FindByIdAsync(viewModel.Id);
+                    var salesData = await salesRepository.FindById(viewModel.Id);
+                    var salesItems = await stockMovementRepository.FindByIdAsync(viewModel.Id);
                     var vm = new SalesReturnVm
                     {
                     Id = salesData.Id,
                     InvoiceNumber = salesData.InvoiceNo,
                     Description = salesData.Description ?? "",
                     DiscountAmount = salesData.DiscountAmount,
-                    StakeHolderName = await _stakeHolderRepository.GetStakeHolderName(salesData.StakeHolderId),
+                    StakeHolderName = await stakeholderRepository.GetStakeHolderName(salesData.StakeHolderId),
                     TotalAmount = salesData.TotalAmount,
                     TaxableAmount = salesData.TaxableAmount,
                     TaxAmount = salesData.TaxAmount,
@@ -332,7 +320,7 @@ public class SalesController : Controller
                         UnitName = sm.Product.Unit.Name,
                     }).ToList(),
                     };
-                    var allProducts = await _productRepository.GetAllAsync();
+                    var allProducts = await productRepository.GetAllAsync();
                     vm.ProductUnitMap = allProducts.ToDictionary(
                         p => p.Id.ToString(),
                         p => p.Unit.Symbol
@@ -353,7 +341,7 @@ public class SalesController : Controller
                 Status = Status.Returned,
                 };
 
-            var sales = await _salesService.CreateAsync(salesDto);
+            var sales = await salesService.CreateAsync(salesDto);
             var stockMovementsDto = viewModel.StockMovements.Select(sm => new StockMovementDto
             {
 
@@ -367,20 +355,20 @@ public class SalesController : Controller
                 TypeId = sales.Id,
                 Stock = Stock.In,
             }).ToList();
-            await _stockMovementService.AddAsync(stockMovementsDto);
+            await stockMovementService.AddAsync(stockMovementsDto);
             return RedirectToAction("Index"); 
             }
             catch (Exception ex)
             {
-                var sales = await _salesRepository.FindById(viewModel.Id);
-                var salesItems = await _stockMovementRepository.FindByIdAsync(viewModel.Id);
+                var sales = await salesRepository.FindById(viewModel.Id);
+                var salesItems = await stockMovementRepository.FindByIdAsync(viewModel.Id);
                 var vm = new SalesReturnVm
             {
                 Id = sales.Id,
                 InvoiceNumber = sales.InvoiceNo,
                 Description = sales.Description ?? string.Empty,
                 DiscountAmount = sales.DiscountAmount,
-                StakeHolderName = await _stakeHolderRepository.GetStakeHolderName(sales.StakeHolderId),
+                StakeHolderName = await stakeholderRepository.GetStakeHolderName(sales.StakeHolderId),
                 TotalAmount = sales.TotalAmount,
                 TaxableAmount = sales.TaxableAmount,
                 TaxAmount = sales.TaxAmount,
@@ -397,7 +385,7 @@ public class SalesController : Controller
                     UnitName = sm.Product.Unit.Name,
                 }).ToList(),
             };
-            var allProducts = await _productRepository.GetAllAsync();
+            var allProducts = await productRepository.GetAllAsync();
             vm.ProductUnitMap = allProducts.ToDictionary(
                 p => p.Id.ToString(),
                 p => p.Unit.Symbol

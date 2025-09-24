@@ -6,15 +6,8 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Service;
 
-public class SalesService : ISalesService
+public class SalesService(ApplicationDbContext context) : ISalesService
 {
-    private readonly ApplicationDbContext _context;
-
-    public SalesService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<Sale> CreateAsync(SalesDto dto)
     {
         var sales = new Sale()
@@ -31,14 +24,14 @@ public class SalesService : ISalesService
             DiscountAmount = dto.DiscountAmount,
 
         };
-        _context.Sales.Add(sales);
-        await _context.SaveChangesAsync();
+        context.Sales.Add(sales);
+        await context.SaveChangesAsync();
         return sales;
     }
 
     public async Task<Sale> UpdateAsync(SalesDto dto)
     {
-        var sales = await _context.Sales.FirstOrDefaultAsync(s => s.Id == dto.Id);
+        var sales = await context.Sales.FirstOrDefaultAsync(s => s.Id == dto.Id);
         if (sales == null)
             throw new KeyNotFoundException("Item not found...");
         sales.Id = dto.Id;
@@ -50,8 +43,8 @@ public class SalesService : ISalesService
         sales.TaxAmount = dto.TaxAmount;
         sales.TransactionDate = dto.TransactionDate;
         sales.TotalAmount = dto.TotalAmount;
-        _context.Sales.Update(sales);
-        await _context.SaveChangesAsync();
+        context.Sales.Update(sales);
+        await context.SaveChangesAsync();
         return sales;
     }
 }

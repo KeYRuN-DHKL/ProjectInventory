@@ -5,15 +5,8 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Service;
 
-public class DamageService : IDamageService
+public class DamageService(ApplicationDbContext context) : IDamageService
 {
-    private readonly ApplicationDbContext _context;
-
-    public DamageService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<Damage> AddAsync(DamageDto dto)
     {
         var damage= new Damage
@@ -24,8 +17,8 @@ public class DamageService : IDamageService
             CreatedAt = DateTime.UtcNow,
             Description = dto.Description
         };
-        _context.Damages.Add(damage);
-        await _context.SaveChangesAsync();
+        context.Damages.Add(damage);
+        await context.SaveChangesAsync();
         return damage;
     }
 }

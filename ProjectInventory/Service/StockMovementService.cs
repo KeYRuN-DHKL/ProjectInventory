@@ -6,15 +6,8 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Service;
 
-public class StockMovementService : IStockMovementService
+public class StockMovementService(ApplicationDbContext context) : IStockMovementService
 {
-    private readonly ApplicationDbContext _context;
-
-    public StockMovementService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<bool> AddAsync(List<StockMovementDto> dto)
     {
         var stockMovementEntity = dto.Select(d => new StockMovement
@@ -33,13 +26,13 @@ public class StockMovementService : IStockMovementService
             
         }).ToList();
 
-        await _context.StockMovements.AddRangeAsync(stockMovementEntity);
-        return await _context.SaveChangesAsync() > 0;
+        await context.StockMovements.AddRangeAsync(stockMovementEntity);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> UpdateAsync(StockMovementDto dto)
     {
-        var stockMovement = await _context.StockMovements.FindAsync(dto.Id);
+        var stockMovement = await context.StockMovements.FindAsync(dto.Id);
         if (stockMovement == null)
         {
             throw new KeyNotFoundException($"StockMovement not found");
@@ -53,17 +46,17 @@ public class StockMovementService : IStockMovementService
         stockMovement.Stock = dto.Stock;
         stockMovement.InvoiceNumber = dto.InvoiceNumber ?? stockMovement.InvoiceNumber;
 
-        _context.StockMovements.Update(stockMovement);
-        return await _context.SaveChangesAsync() > 0;
+        context.StockMovements.Update(stockMovement);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var stockMovement = await _context.StockMovements.FindAsync(id);
+        var stockMovement = await context.StockMovements.FindAsync(id);
         if (stockMovement == null)
             throw new KeyNotFoundException($"Unable to find the stockMovement");
-        _context.StockMovements.Remove(stockMovement);
-        return await _context.SaveChangesAsync() > 0;
+        context.StockMovements.Remove(stockMovement);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> AddAsync(StockMovementDto dto)
@@ -82,8 +75,8 @@ public class StockMovementService : IStockMovementService
             TypeId = dto.TypeId,
             Stock = dto.Stock,
         };
-        _context.StockMovements.Add(stockMovement);
-        return await _context.SaveChangesAsync() > 0;
+        context.StockMovements.Add(stockMovement);
+        return await context.SaveChangesAsync() > 0;
     }
     
 }

@@ -7,25 +7,18 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Controllers;
 
-public class OpeningController:Controller
+public class OpeningController(
+    IOpeningService openingService,
+    IProductRepository productRepository,
+    IStockMovementService stockMovementService)
+    : Controller
 {
-    private readonly IOpeningService _openingService;
-    private readonly IProductRepository _productRepository;
-    private readonly IStockMovementService _stockMovementService;
-
-    public OpeningController(IOpeningService openingService, IProductRepository productRepository, IStockMovementService stockMovementService)
-    {
-        _openingService = openingService;
-        _productRepository = productRepository;
-        _stockMovementService = stockMovementService;
-    }
-
     public async Task<IActionResult> Create()
     {
         OpeningVm vm = new OpeningVm();
-        vm.Products = await _productRepository.GetAllSelectListAsync();
+        vm.Products = await productRepository.GetAllSelectListAsync();
         vm.Date = DateOnly.FromDateTime(DateTime.Now);
-        var products = await _productRepository.GetAllAsync();
+        var products = await productRepository.GetAllAsync();
         vm.ProductUnitMap = products.ToDictionary(
             p => p.Id.ToString(),
             p => p.Unit.Symbol
@@ -41,9 +34,9 @@ public class OpeningController:Controller
         {
             if (!ModelState.IsValid)
             {
-                vm.Products = await _productRepository.GetAllSelectListAsync();
+                vm.Products = await productRepository.GetAllSelectListAsync();
                 vm.Date = DateOnly.FromDateTime(DateTime.Now);
-                var products = await _productRepository.GetAllAsync();
+                var products = await productRepository.GetAllAsync();
                 vm.ProductUnitMap = products.ToDictionary(
                     p => p.Id.ToString(),
                     p => p.Unit.Symbol
@@ -59,7 +52,7 @@ public class OpeningController:Controller
                 Description = vm.Description
             };
 
-            var opening = await _openingService.AddAsync(dto);
+            var opening = await openingService.AddAsync(dto);
             var stockMovementsDto = vm.StockMovements.Select(sm => new StockMovementDto
             {
 
@@ -71,15 +64,15 @@ public class OpeningController:Controller
                 TypeId = opening.Id,
                 Stock = sm.Stock,
             }).ToList();
-            await _stockMovementService.AddAsync(stockMovementsDto);
+            await stockMovementService.AddAsync(stockMovementsDto);
             return RedirectToAction("Index");
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", $"An unexpected error occured {ex.Message}");
-            vm.Products = await _productRepository.GetAllSelectListAsync();
+            vm.Products = await productRepository.GetAllSelectListAsync();
             vm.Date = DateOnly.FromDateTime(DateTime.Now);
-            var products = await _productRepository.GetAllAsync();
+            var products = await productRepository.GetAllAsync();
             vm.ProductUnitMap = products.ToDictionary(
                 p => p.Id.ToString(),
                 p => p.Unit.Symbol

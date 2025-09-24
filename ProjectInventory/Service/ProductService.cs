@@ -6,18 +6,11 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Service;
 
-public class ProductService : IProductService
+public class ProductService(ApplicationDbContext context) : IProductService
 {
-    private readonly ApplicationDbContext _context;
-
-    public ProductService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<bool> AddAsync(ProductDto dto)
     {
-        var product = await _context.Products.AnyAsync(p => p.Code == dto.Code);
+        var product = await context.Products.AnyAsync(p => p.Code == dto.Code);
         if (product)
             throw new InvalidOperationException("Product is already available....");
         var productEntity = new Product
@@ -32,17 +25,17 @@ public class ProductService : IProductService
             IsActive = dto.IsActive,
             CreatedAt = DateTime.UtcNow
         };
-        _context.Products.Add(productEntity);
-        return await _context.SaveChangesAsync() > 0;
+        context.Products.Add(productEntity);
+        return await context.SaveChangesAsync() > 0;
     }
 
     public async Task<bool> UpdateAsync(Guid id, ProductDto dto)
     {
-        var product = await _context.Products.FindAsync(id);
+        var product = await context.Products.FindAsync(id);
         if (product == null)
             throw new KeyNotFoundException($"Product not available");
         
-        var isProductExisted = await _context.Products.AnyAsync(p => p.Code == dto.Code && p.Name == dto.Name);
+        var isProductExisted = await context.Products.AnyAsync(p => p.Code == dto.Code && p.Name == dto.Name);
         if (isProductExisted)
             throw new InvalidOperationException($"Product Already Exists");
 
@@ -55,15 +48,15 @@ public class ProductService : IProductService
         product.IsActive = dto.IsActive;
         product.UpdatedAt = DateTime.UtcNow;
 
-        _context.Products.Update(product);
-        return await _context.SaveChangesAsync() > 0;
+        context.Products.Update(product);
+        return await context.SaveChangesAsync() > 0;
     }
     public async Task<bool> DeleteAsync(Guid id)
     {
-        var item = await _context.Products.FindAsync(id);
+        var item = await context.Products.FindAsync(id);
         if (item == null)
             throw new InvalidOperationException("Item not found");
-        _context.Products.Remove(item);
-        return await _context.SaveChangesAsync() > 0;
+        context.Products.Remove(item);
+        return await context.SaveChangesAsync() > 0;
     }
 }

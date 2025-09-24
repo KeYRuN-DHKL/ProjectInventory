@@ -5,15 +5,8 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Service;
 
-public class UnitService : IUnitService
+public class UnitService(ApplicationDbContext context) : IUnitService
 {
-    private readonly ApplicationDbContext _context;
-
-    public UnitService(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task AddAsync(UnitDto dto)
     {
         var unit = new Unit
@@ -23,13 +16,13 @@ public class UnitService : IUnitService
             Symbol = dto.Symbol,
             Description = dto.Description,
         };
-        _context.Units.Add(unit);
-        await _context.SaveChangesAsync();
+        context.Units.Add(unit);
+        await context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(Guid id, UnitDto dto)
     {
-        var item = await _context.Units.FindAsync(id);
+        var item = await context.Units.FindAsync(id);
         if (item == null)
             throw new InvalidOperationException($"Item with the Id: {id} not found");
 
@@ -38,19 +31,19 @@ public class UnitService : IUnitService
         item.Description = dto.Description;
         item.IsActive = dto.IsActive;
 
-        _context.Units.Update(item);
-        await _context.SaveChangesAsync();
+        context.Units.Update(item);
+        await context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        var item = await _context.Units.FindAsync(id);
+        var item = await context.Units.FindAsync(id);
         if (item == null)
         {
             throw new InvalidOperationException($"Item with the Id: {id} not found...");
         }
 
-        _context.Units.Remove(item);
-        await _context.SaveChangesAsync();
+        context.Units.Remove(item);
+        await context.SaveChangesAsync();
     }
 }

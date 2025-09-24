@@ -6,30 +6,23 @@ using ProjectInventory.Entities;
 
 namespace ProjectInventory.Repository;
 
-public class StakeHolderRepository : IStakeHolderRepository
+public class StakeHolderRepository(ApplicationDbContext context) : IStakeHolderRepository
 {
-    private readonly ApplicationDbContext _context;
-
-    public StakeHolderRepository(ApplicationDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<List<StakeHolder>> GetAllAsync()
     {
-        var items = await _context.StakeHolders.ToListAsync();
+        var items = await context.StakeHolders.ToListAsync();
         return items;
     }
 
     public async Task<StakeHolder?> GetByIdAsync(Guid id)
     {
-        var item = await _context.StakeHolders.FindAsync(id);
+        var item = await context.StakeHolders.FindAsync(id);
         return item;
     }
 
     public async Task<List<SelectListItem>> GetAllSelectListAsync()
     {
-        return await _context.StakeHolders
+        return await context.StakeHolders
             .Where(s => s.IsActive)
             .Select(s => new SelectListItem
             {
@@ -40,7 +33,7 @@ public class StakeHolderRepository : IStakeHolderRepository
 
     public async Task<string> GetStakeHolderName(Guid id)
     {
-        var stakeHolder = await _context.StakeHolders.FindAsync(id);
+        var stakeHolder = await context.StakeHolders.FindAsync(id);
         if (stakeHolder == null)
             throw new KeyNotFoundException("stakeholder not found...");
         return stakeHolder.Name;
