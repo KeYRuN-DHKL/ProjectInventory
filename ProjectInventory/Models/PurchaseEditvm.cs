@@ -19,7 +19,7 @@ public class PurchaseEditvm
     public List<SelectListItem>? Products { get; set; } = new List<SelectListItem>();
 
     public List<SelectListItem>? StakeHolders { get; set; } = new List<SelectListItem>();
-    public Dictionary<string, string>? ProductUnitMap { get; set; } = new Dictionary<string, string>();
+    public Dictionary<string, ProductUnitVm>? ProductUnitMap { get; set; } = new Dictionary<string, ProductUnitVm>();
     
     public List<StockMovementEditVm> StockMovements { get; set; } = new List<StockMovementEditVm>();
 }

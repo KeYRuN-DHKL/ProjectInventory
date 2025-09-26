@@ -116,7 +116,7 @@
                         <input type="number" name="StockMovements[${index}].Quantity" class="form-control quantity" value="0" step="0.01" min="0.1" required />
                     </td>
                     <td>
-                        <input type="number" name="StockMovements[${index}].Rate" class="form-control rate" value="0" step="0.01" min="0" required />
+                        <input type="text" name="StockMovements[${index}].Rate" class="form-control rate" readonly />
                     </td>
                     <td>
                         <input type="text" class="form-control amount" readonly value="0.00" />
@@ -181,8 +181,11 @@
         $(document).on("change", ".product-select", function () {
             const selectedProductId = $(this).val();
             const row = $(this).closest("tr");
-            const unit = productUnitMap[selectedProductId] || "";
-            row.find(".unit-text").val(unit);
+            const unitObj = productUnitMap[selectedProductId];
+            const unitSymbol = unitObj ? unitObj.symbol : "";
+            row.find(".unit-text").val(unitSymbol);
+            const unitCost = unitObj ? unitObj.costPrice : "";
+            row.find(".rate").val(unitCost);
         });
 
         $(document).on("click", "#add-row", function () {
@@ -218,6 +221,5 @@
             addRow();
         });
         
-
     </script>
 }

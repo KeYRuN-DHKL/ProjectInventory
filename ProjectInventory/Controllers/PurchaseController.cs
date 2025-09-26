@@ -8,30 +8,19 @@ using ProjectInventory.Service.Interface;
 
 namespace ProjectInventory.Controllers;
 
-public class PurchaseController : Controller
+public class PurchaseController(
+    IProductRepository productRepository,
+    IStakeHolderRepository stakeholderRepository,
+    IPurchaseService purchaseService,
+    IStockMovementService stockMovementService,
+    IPurchaseRepository purchaseRepository,
+    IToastNotification toastNotification,
+    IStockMovementRepository stockMovementRepository)
+    : Controller
 {
-    private readonly IProductRepository _productRepository;
-    private readonly IStakeHolderRepository _stakeholderRepository;
-    private readonly IPurchaseService _purchaseService;
-    private readonly IPurchaseRepository _purchaseRepository;
-    private readonly IStockMovementService _stockMovementService;
-    private readonly IToastNotification _toastNotification;
-    private readonly IStockMovementRepository _stockMovementRepository;
-
-    public PurchaseController(IProductRepository productRepository, IStakeHolderRepository stakeholderRepository, IPurchaseService purchaseService, IStockMovementService stockMovementService, IPurchaseRepository purchaseRepository, IToastNotification toastNotification, IStockMovementRepository stockMovementRepository)
-    {
-        _productRepository = productRepository;
-        _stakeholderRepository = stakeholderRepository;
-        _purchaseService = purchaseService;
-        _stockMovementService = stockMovementService;
-        _purchaseRepository = purchaseRepository;
-        _toastNotification = toastNotification;
-        _stockMovementRepository = stockMovementRepository;
-    }
-
     public IActionResult Index()
     {
-        var items = _purchaseRepository.GetQueryAbleData();
+        var items = purchaseRepository.GetQueryAbleData();
         var vm = items.Select(p => new PurchaseIndexVm
         {
             Id = p.Id,
@@ -54,20 +43,20 @@ public class PurchaseController : Controller
         {
             var vm = new PurchaseVm
             {
-                Products = await _productRepository.GetAllSelectListAsync(),
-                StakeHolders = await _stakeholderRepository.GetAllSelectListAsync(),
+                Products = await productRepository.GetAllSelectListAsync(),
+                StakeHolders = await stakeholderRepository.GetAllSelectListAsync(),
                 TransactionDate = DateOnly.FromDateTime(DateTime.Now)
             };
-            var products = await _productRepository.GetAllAsync();
+            var products = await productRepository.GetAllAsync();
             vm.ProductUnitMap = products.ToDictionary(
                 p => p.Id.ToString(),
-                p => p.Unit.Symbol
+                p => new ProductUnitVm{Symbol = p.Unit.Symbol,CostPrice=p.CostPrice}
             );
             return View(vm);
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", $"An error occured while Purchasing the item {ex.Message}");
+            toastNotification.AddErrorToastMessage("An error occured...");
             return View();
         }
     }
@@ -78,14 +67,15 @@ public class PurchaseController : Controller
     {
         if (!ModelState.IsValid)
         {
-            vm.Products = await _productRepository.GetAllSelectListAsync();
-            vm.StakeHolders = await _stakeholderRepository.GetAllSelectListAsync();
+            toastNotification.AddErrorToastMessage("An model state not valid...");
+            vm.Products = await productRepository.GetAllSelectListAsync();
+            vm.StakeHolders = await stakeholderRepository.GetAllSelectListAsync();
             vm.TransactionDate = DateOnly.FromDateTime(DateTime.Now);
-            var products = await _productRepository.GetAllAsync();
+            var products = await productRepository.GetAllAsync();
             vm.ProductUnitMap = products.ToDictionary(
                 p => p.Id.ToString(),
-                p => p.Unit.Symbol
-                );
+                p => new ProductUnitVm{Symbol = p.Unit.Symbol,CostPrice = p.CostPrice}
+            );
             return View(vm);
         }
 
@@ -103,7 +93,7 @@ public class PurchaseController : Controller
                 TaxableAmount = vm.TaxableAmount,
             };
 
-            var purchase = await _purchaseService.CreateAsync(purchaseDto);
+            var purchase = await purchaseService.CreateAsync(purchaseDto);
             var stockMovementsDto = vm.StockMovements.Select(sm => new StockMovementDto
             {
 
@@ -117,19 +107,20 @@ public class PurchaseController : Controller
                 TypeId = purchase.Id,
                 Stock = Stock.In,
             }).ToList();
-            await _stockMovementService.AddAsync(stockMovementsDto);
+            await stockMovementService.AddAsync(stockMovementsDto);
             return RedirectToAction("Index");
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError("", $"An unexpected error occured {ex.Message}");
-            vm.Products= await _productRepository.GetAllSelectListAsync();
-            vm.StakeHolders = await _stakeholderRepository.GetAllSelectListAsync();
+            // ModelState.AddModelError("", $"An unexpected error occured {ex.Message}");
+            toastNotification.AddErrorToastMessage("An error occured...");
+            vm.Products= await productRepository.GetAllSelectListAsync();
+            vm.StakeHolders = await stakeholderRepository.GetAllSelectListAsync();
             vm.TransactionDate = DateOnly.FromDateTime(DateTime.Now);
-            var products = await _productRepository.GetAllAsync();
+            var products = await productRepository.GetAllAsync();
             vm.ProductUnitMap = products.ToDictionary(
             p=> p.Id.ToString(),
-            p=> p.Unit.Symbol
+            p=> new ProductUnitVm{Symbol = p.Unit.Symbol,CostPrice = p.CostPrice}
         ); 
             return View(vm);
         }
@@ -138,10 +129,10 @@ public class PurchaseController : Controller
     {
         try
         {
-            var purchase = await _purchaseRepository.FindById(id);
-            var purchaseItems = await _stockMovementRepository.FindByIdAsync(id);
-            var stakeHolders = await _stakeholderRepository.GetAllSelectListAsync();
-            var products = await _productRepository.GetAllSelectListAsync();
+            var purchase = await purchaseRepository.FindById(id);
+            var purchaseItems = await stockMovementRepository.FindByIdAsync(id);
+            var stakeHolders = await stakeholderRepository.GetAllSelectListAsync();
+            var products = await productRepository.GetAllSelectListAsync();
             var vm = new PurchaseEditvm
             {
                 Id = purchase.Id,
@@ -167,16 +158,16 @@ public class PurchaseController : Controller
                 Products = products,
                 StakeHolders = stakeHolders,
             };
-            var allProducts = await _productRepository.GetAllAsync();
+            var allProducts = await productRepository.GetAllAsync();
             vm.ProductUnitMap = allProducts.ToDictionary(
                 p => p.Id.ToString(),
-                p => p.Unit.Symbol
+                p => new ProductUnitVm{Symbol = p.Unit.Symbol,CostPrice = p.CostPrice}
             );
             return View(vm);
         }
         catch (Exception ex)
         {
-            _toastNotification.AddErrorToastMessage("An unexpected error occured..." + ex.Message);
+            toastNotification.AddErrorToastMessage("An unexpected error occured..." + ex.Message);
             return RedirectToAction("Index");
         }
     }
@@ -189,13 +180,13 @@ public class PurchaseController : Controller
         {
             if (!ModelState.IsValid)
             {
-                vm.Products = await _productRepository.GetAllSelectListAsync();
-                vm.StakeHolders = await _stakeholderRepository.GetAllSelectListAsync();
+                vm.Products = await productRepository.GetAllSelectListAsync();
+                vm.StakeHolders = await stakeholderRepository.GetAllSelectListAsync();
                 vm.TransactionDate = DateOnly.FromDateTime(DateTime.Now);
-                var products = await _productRepository.GetAllAsync();
+                var products = await productRepository.GetAllAsync();
                 vm.ProductUnitMap = products.ToDictionary(
                     p => p.Id.ToString(),
-                    p => p.Unit.Symbol
+                    p => new ProductUnitVm{Symbol = p.Unit.Symbol,CostPrice = p.CostPrice}
                 );
                 return View(vm);
             }
@@ -214,14 +205,14 @@ public class PurchaseController : Controller
                 TotalAmount = vm.TotalAmount,
             };
 
-            var updatedPurchase = await _purchaseService.UpdateAsync(purchaseDto);
-            var existingStockMovement = await _stockMovementRepository.FindByIdAsync(vm.Id);
+            var updatedPurchase = await purchaseService.UpdateAsync(purchaseDto);
+            var existingStockMovement = await stockMovementRepository.FindByIdAsync(vm.Id);
 
             foreach (var item in existingStockMovement)
             {
                 if (vm.StockMovements.All(x => x.Id != item.Id))
                 {
-                    await _stockMovementService.DeleteAsync(item.Id);
+                    await stockMovementService.DeleteAsync(item.Id);
                 }
 
                 if (vm.StockMovements.All(x => x.Id == item.Id))
@@ -238,7 +229,7 @@ public class PurchaseController : Controller
                         TypeId = updatedPurchase.Id,
                         VatPercentage = newStockMovement.VatPercentage,
                     };
-                    await _stockMovementService.UpdateAsync(stockMovementDto);
+                    await stockMovementService.UpdateAsync(stockMovementDto);
                 }
             }
 
@@ -258,7 +249,7 @@ public class PurchaseController : Controller
                         TypeId = updatedPurchase.Id,
                         VatPercentage = item.VatPercentage,
                     };
-                    await _stockMovementService.AddAsync(stockMovementDto);
+                    await stockMovementService.AddAsync(stockMovementDto);
                 }
             }
 
@@ -266,7 +257,7 @@ public class PurchaseController : Controller
         }
         catch (Exception ex)
         {
-            _toastNotification.AddErrorToastMessage(ex.Message);
+            toastNotification.AddErrorToastMessage(ex.Message);
             return RedirectToAction(nameof(Index));
         }
     }
@@ -275,15 +266,15 @@ public class PurchaseController : Controller
     {
         try
         {
-            var purchase = await _purchaseRepository.FindById(id);
-            var purchaseItems = await _stockMovementRepository.FindByIdAsync(id);
+            var purchase = await purchaseRepository.FindById(id);
+            var purchaseItems = await stockMovementRepository.FindByIdAsync(id);
             var vm = new PurchaseReturnVm
             {
                 Id = purchase.Id,
                 InvoiceNumber = purchase.InvoiceNumber,
                 Description = purchase.Description,
                 DiscountAmount = purchase.DiscountAmount,
-                StakeHolderName = await _stakeholderRepository.GetStakeHolderName(purchase.StakeHolderId),
+                StakeHolderName = await stakeholderRepository.GetStakeHolderName(purchase.StakeHolderId),
                 StakeHolderId = purchase.StakeHolderId,
                 TotalAmount = purchase.TotalAmount,
                 TaxableAmount = purchase.TaxableAmount,
@@ -301,16 +292,16 @@ public class PurchaseController : Controller
                     UnitName = sm.Product.Unit.Name,
                 }).ToList(),
             };
-            var allProducts = await _productRepository.GetAllAsync();
+            var allProducts = await productRepository.GetAllAsync();
             vm.ProductUnitMap = allProducts.ToDictionary(
                 p => p.Id.ToString(),
-                p => p.Unit.Symbol
+                p => new ProductUnitVm{Symbol = p.Unit.Symbol,CostPrice = p.CostPrice}
             );
             return View(vm);
         }
         catch (Exception ex)
         {
-            _toastNotification.AddErrorToastMessage("An unexpected error occured..." + ex.Message);
+            toastNotification.AddErrorToastMessage("An unexpected error occured..." + ex.Message);
             return RedirectToAction("Index");
         }
     }
@@ -323,15 +314,15 @@ public class PurchaseController : Controller
             {
                 if (!ModelState.IsValid)
                 {
-                    var purchaseData = await _purchaseRepository.FindById(viewModel.Id);
-                    var purchaseItems = await _stockMovementRepository.FindByIdAsync(viewModel.Id);
+                    var purchaseData = await purchaseRepository.FindById(viewModel.Id);
+                    var purchaseItems = await stockMovementRepository.FindByIdAsync(viewModel.Id);
                     var vm = new PurchaseReturnVm
                     {
                     Id = purchaseData.Id,
                     InvoiceNumber = purchaseData.InvoiceNumber,
                     Description = purchaseData.Description,
                     DiscountAmount = purchaseData.DiscountAmount,
-                    StakeHolderName = await _stakeholderRepository.GetStakeHolderName(purchaseData.StakeHolderId),
+                    StakeHolderName = await stakeholderRepository.GetStakeHolderName(purchaseData.StakeHolderId),
                     TotalAmount = purchaseData.TotalAmount,
                     TaxableAmount = purchaseData.TaxableAmount,
                     TaxAmount = purchaseData.TaxAmount,
@@ -348,10 +339,10 @@ public class PurchaseController : Controller
                         UnitName = sm.Product.Unit.Name,
                     }).ToList(),
                     };
-                    var allProducts = await _productRepository.GetAllAsync();
+                    var allProducts = await productRepository.GetAllAsync();
                     vm.ProductUnitMap = allProducts.ToDictionary(
                         p => p.Id.ToString(),
-                        p => p.Unit.Symbol
+                        p => new ProductUnitVm{Symbol = p.Unit.Symbol,CostPrice = p.CostPrice}
                     );
                     return View(vm);
                 } 
@@ -369,7 +360,7 @@ public class PurchaseController : Controller
                 Status = Status.Returned,
                 };
 
-            var purchase = await _purchaseService.CreateAsync(purchaseDto);
+            var purchase = await purchaseService.CreateAsync(purchaseDto);
             var stockMovementsDto = viewModel.StockMovements.Select(sm => new StockMovementDto
             {
 
@@ -383,20 +374,20 @@ public class PurchaseController : Controller
                 TypeId = purchase.Id,
                 Stock = Stock.Out,
             }).ToList();
-            await _stockMovementService.AddAsync(stockMovementsDto);
+            await stockMovementService.AddAsync(stockMovementsDto);
             return RedirectToAction("Index"); 
             }
             catch (Exception ex)
             {
-                var purchase = await _purchaseRepository.FindById(viewModel.Id);
-                var purchaseItems = await _stockMovementRepository.FindByIdAsync(viewModel.Id);
+                var purchase = await purchaseRepository.FindById(viewModel.Id);
+                var purchaseItems = await stockMovementRepository.FindByIdAsync(viewModel.Id);
                 var vm = new PurchaseReturnVm
             {
                 Id = purchase.Id,
                 InvoiceNumber = purchase.InvoiceNumber,
                 Description = purchase.Description,
                 DiscountAmount = purchase.DiscountAmount,
-                StakeHolderName = await _stakeholderRepository.GetStakeHolderName(purchase.StakeHolderId),
+                StakeHolderName = await stakeholderRepository.GetStakeHolderName(purchase.StakeHolderId),
                 TotalAmount = purchase.TotalAmount,
                 TaxableAmount = purchase.TaxableAmount,
                 TaxAmount = purchase.TaxAmount,
@@ -413,10 +404,10 @@ public class PurchaseController : Controller
                     UnitName = sm.Product.Unit.Name,
                 }).ToList(),
             };
-            var allProducts = await _productRepository.GetAllAsync();
+            var allProducts = await productRepository.GetAllAsync();
             vm.ProductUnitMap = allProducts.ToDictionary(
                 p => p.Id.ToString(),
-                p => p.Unit.Symbol
+                p => new ProductUnitVm{Symbol = p.Unit.Symbol,CostPrice = p.CostPrice}
             );
             return View(vm);
             }

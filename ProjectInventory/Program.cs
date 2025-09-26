@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using NToastNotify;
 using ProjectInventory.Data;
+using ProjectInventory.Entities;
 using ProjectInventory.Repository;
 using ProjectInventory.Repository.Interface;
 using ProjectInventory.Service;
@@ -9,8 +13,14 @@ using ProjectInventory.Service.Interface;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews()
-    .AddNToastNotifyToastr(new NToastNotify.ToastrOptions() //Adding popup for the View
+builder.Services.AddControllersWithViews(options =>
+    {
+        var policy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+        options.Filters.Add(new AuthorizeFilter(policy));
+    })
+.AddNToastNotifyToastr(new NToastNotify.ToastrOptions() //Adding popup for the View
     {
         ProgressBar = true,
         PositionClass = ToastPositions.TopRight,
@@ -18,8 +28,16 @@ builder.Services.AddControllersWithViews()
         CloseButton = true,
     });
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+});
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
@@ -53,6 +71,7 @@ app.UseStaticFiles();
 app.UseNToastNotify();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

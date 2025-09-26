@@ -10,7 +10,7 @@ public class StakeHolderVm
     public string Name { get; set; } = null!;
 
     [Required(ErrorMessage = "VatNo is required")]
-    [RegularExpression(@"^\d(-?\d){8}$", ErrorMessage = "Invalid VAT number")]
+    [RegularExpression(@"^\d+$", ErrorMessage = "Only digits are allowed")]
     public string VatNo { get; set; } = null!;
 
     [Required(ErrorMessage = "Address is required.")]

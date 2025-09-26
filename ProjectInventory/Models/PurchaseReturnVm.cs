@@ -16,7 +16,7 @@ public class PurchaseReturnVm
     public decimal DiscountAmount { get; set; }
     public string Description { get; set; } = string.Empty;
     public decimal GrandTotal => TotalAmount + TaxAmount - DiscountAmount;
-    public Dictionary<string, string>? ProductUnitMap { get; set; } = new Dictionary<string, string>();
+    public Dictionary<string, ProductUnitVm>? ProductUnitMap { get; set; } = new Dictionary<string, ProductUnitVm>();
     
     public List<StockMovementReturnVm> StockMovements { get; set; } = new List<StockMovementReturnVm>();
 }
