@@ -17,12 +17,13 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/menubar.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow-sm">
+            <div class="card shadow-lg rounded-3">
                 <div class="card-header bg-primary text-white text-center">
                     <h3>Register</h3>
                 </div>
@@ -50,13 +51,23 @@
 
                         <div class="mb-3">
                             <label asp-for="Password" class="form-label"></label>
-                            <input asp-for="Password" class="form-control" type="password" placeholder="Enter password" />
+                            <div class="input-group">
+                                <input asp-for="Password" class="form-control passwordManagement" type="password" placeholder="Enter password" /> 
+                                <span class="input-group-text" id="togglePassword" style="cursor:pointer;">
+                                    <i class="bi bi-eye"></i>
+                                </span>
+                            </div>
                             <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="ConfirmPassword" class="form-label"></label>
-                            <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Confirm password" />
+                            <div class="input-group">
+                                <input asp-for="ConfirmPassword" class="form-control passwordManagement" type="password" placeholder="Confirm password" />
+                                <span class="input-group-text" id="passwordToggle" style="cursor:pointer;">
+                                    <i class="bi bi-eye"></i>
+                                </span>
+                            </div>
                             <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                         </div>
 
@@ -71,5 +82,22 @@
     </div>
 </div>
 </body>
+<script>
+    const togglePassword = document.querySelectorAll('.input-group-text');
+    const passwordField = document.querySelectorAll('.passwordManagement');
+    
+    togglePassword.forEach(function(items,index){
+        items.addEventListener('click',function(){
+            const type = passwordField[index].getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField[index].setAttribute('type',type);
+            
+            const icon = this.querySelector('i');
+            if(icon){
+                icon.classList.toggle('bi-eye');
+                icon.classList.toggle('bi-eye-slash');
+            }
+        });
+    });
+</script>
 </html>
 
