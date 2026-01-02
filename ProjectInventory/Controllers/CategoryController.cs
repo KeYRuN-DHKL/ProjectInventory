@@ -72,6 +72,10 @@ public class CategoryController(
     public async Task<IActionResult> Edit(Guid id)
     {
         var item = await repository.GetByIdAsync(id);
+        
+        if (item == null)
+            return NotFound();
+        
         var vm = new CategoryEditVm
         {
             Name = item.Name,
