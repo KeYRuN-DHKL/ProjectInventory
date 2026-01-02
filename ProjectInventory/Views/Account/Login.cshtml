@@ -81,7 +81,7 @@
     const passwordField = document.querySelector('#passwordField');
     
     togglePassword.addEventListener('click',function(){
-        const type = passwordField.getAttribute('type') === 'Password' ? 'text' : 'Password';
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
         passwordField.setAttribute('type',type);
         
         const icon = this.querySelector('i');
