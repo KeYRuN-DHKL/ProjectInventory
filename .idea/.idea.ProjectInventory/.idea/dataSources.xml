@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="StockDatabase@localhost" uuid="5ab5b62c-b2af-4f77-b802-7ad8329457d9">
+    <data-source source="LOCAL" name="StockDatabase@localhost" uuid="84b7b542-4dc4-4a76-b4a8-66e8050ab41e">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
-      <configured-by-url>true</configured-by-url>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5432/StockDatabase</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
