@@ -91,19 +91,19 @@ public class CategoryController(
     {
         if (!ModelState.IsValid)
         {
-            return View(vm);
+            return View(vm); 
         }
     
         try
         {
-            var categorylist = new CategoryDto
+            var categoryList = new CategoryDto
             {
                 Id = vm.Id,
                 Name = vm.Name,
                 Description = vm.Description,
                 IsActive = vm.IsActive
             };
-            var isUpdated = await service.EditAsync(id,categorylist);
+            var isUpdated = await service.EditAsync(id,categoryList);
             if (isUpdated)
             {
                 toastNotification.AddSuccessToastMessage("An item has been updated");
